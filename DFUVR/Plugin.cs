@@ -36,7 +36,7 @@ using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 namespace DFUVR
 {
 
-    
+
     //initialize UI
     [HarmonyPatch(typeof(DaggerfallUI), "Start")]
     public class MenuPatch : MonoBehaviour
@@ -45,11 +45,8 @@ namespace DFUVR
         static void Postfix(DaggerfallUI __instance)
         {
             __instance.gameObject.AddComponent<sTx>();
-            
-            __instance.StartCoroutine(UI.Spawn());
-            
-            
 
+            __instance.StartCoroutine(UI.Spawn());
         }
     }
     //needed for UI. attaches a render texture reference to the UI
@@ -60,7 +57,6 @@ namespace DFUVR
         static void Postfix(GameManager __instance)
         {
             __instance.StartCoroutine(GameObject.Find("DaggerfallUI").GetComponent<sTx>().UICal());
-
         }
     }
 
@@ -72,8 +68,6 @@ namespace DFUVR
         static void Postfix(MobilePersonBillboard __instance)
         {
             AccessTools.Field(typeof(MobilePersonBillboard), "mainCamera").SetValue(__instance, Var.VRCamera);
-
-
         }
     }
     //This adjusts the time to be properly formatted on the watch.
@@ -85,7 +79,6 @@ namespace DFUVR
         {
             __result = string.Format("{0:00}:{1:00} {2:00} {3} 3E{4}", __instance.Hour, __instance.Minute, __instance.Day + 1, __instance.MonthName, __instance.Year);
             return false;
-
         }
     }
 
@@ -124,7 +117,7 @@ namespace DFUVR
             //TODO: put all the colliders in a list and for through them instead of this massive block
 
             Physics.IgnoreCollision(handCollider, arrowCollider);
-            Physics.IgnoreCollision(GameObject.Find("PlayerAdvanced").GetComponent<Collider>(),arrowCollider);
+            Physics.IgnoreCollision(GameObject.Find("PlayerAdvanced").GetComponent<Collider>(), arrowCollider);
             Physics.IgnoreCollision(handCollider, __instance.GetComponent<Collider>());
 
             //no clue why this is necessary but for some reason it always collides with these objects if I don't specifically ignore them
@@ -267,7 +260,7 @@ namespace DFUVR
     [HarmonyPatch(typeof(UserInterfaceManager), "PushWindow")]
     public class PushPatch : MonoBehaviour
     {
-        private static PushPatch __pInstance; 
+        private static PushPatch __pInstance;
 
         void Awake()
         {
@@ -283,8 +276,9 @@ namespace DFUVR
             GameObject vrParent = GameObject.Find("VRParent");
             vrui.transform.SetParent(vrParent.transform);
             laserPointer.transform.SetParent(vrParent.transform);
-            if( Var.activeWindowCount < 2) {
-                CoroutineRunner.Instance.StartRoutine(Waiter1()); }
+            if (Var.activeWindowCount < 2)
+                CoroutineRunner.Instance.StartRoutine(Waiter1());
+
             //laserPointer.transform.localPosition = Vector3.zero;
             Var.activeWindowCount++;
 
@@ -310,7 +304,7 @@ namespace DFUVR
             Vector3 uiPositionInFront = vrCameraTransform.position + forwardFlat * 1.5f;
             vrui.transform.localPosition = vrui.transform.parent.InverseTransformPoint(uiPositionInFront);
             Vector3 lookDirection = uiPositionInFront - vrCameraTransform.position;
-            lookDirection.y = 0; 
+            lookDirection.y = 0;
             vrui.transform.rotation = Quaternion.LookRotation(lookDirection);
             FixObstruction(vrui);
 
@@ -331,8 +325,8 @@ namespace DFUVR
             playerAdvanced.GetComponent<CharacterController>().center = Vector3.zero;
             //smoothTransform.transform.localPosition = Vector3.zero;
             vrParent.transform.parent = smoothTransform.transform;
-            Vector3 offset= playerAdvanced.transform.position-tempObject.transform.position;
-            vrParent.transform.localPosition = new Vector3(0-Var.VRCamera.transform.localPosition.x, vrParent.transform.localPosition.y, 0 - Var.VRCamera.transform.localPosition.z);
+            Vector3 offset = playerAdvanced.transform.position - tempObject.transform.position;
+            vrParent.transform.localPosition = new Vector3(0 - Var.VRCamera.transform.localPosition.x, vrParent.transform.localPosition.y, 0 - Var.VRCamera.transform.localPosition.z);
             playerAdvanced.GetComponent<CharacterController>().enabled = true;
             GameObject.Destroy(tempObject);
 
@@ -407,26 +401,22 @@ namespace DFUVR
             {
                 GameObject dungeon = GameObject.Find("Dungeon");
 
-                DaggerfallAction[] actions=dungeon.GetComponentsInChildren<DaggerfallAction>();
+                DaggerfallAction[] actions = dungeon.GetComponentsInChildren<DaggerfallAction>();
 
                 foreach (DaggerfallAction action in actions)
                 {
                     if (action.gameObject.GetComponent<BoxCollider>() == null)
                     {
-
                         BoxCollider boxCollider = action.gameObject.AddComponent<BoxCollider>();
                         boxCollider.isTrigger = true;
                         boxCollider.size = new Vector3(1, 1, 1);
-
                     }
                 }
             }
 
             Var.body.GetComponent<BodyRotationController>().ResetRotation();
-
-
-
         }
+
         //This prevents the UI from spawning inside of an object.
         static void FixObstruction(GameObject vrui)
         {
@@ -438,22 +428,21 @@ namespace DFUVR
 
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
             {
-                
+
                 if (hit.transform != vrui.transform)
                 {
                     //Plugin.LoggerInstance.LogInfo($"Obstruction found: {hit.transform.name}");
 
-                    Vector3 newUIPosition = hit.point + hit.normal * 0.1f; 
+                    Vector3 newUIPosition = hit.point + hit.normal * 0.1f;
                     vrui.transform.position = newUIPosition;
                     Vector3 lookDirection = newUIPosition - vrCameraTransform.position;
-                    lookDirection.y = 0; 
+                    lookDirection.y = 0;
                     vrui.transform.rotation = Quaternion.LookRotation(lookDirection);
                 }
             }
         }
-
     }
-    
+
     //[HarmonyPatch(typeof(DaggerfallUI), "PopupMessage")]
     //public class PopuphPatch : MonoBehaviour
     //{
@@ -497,19 +486,17 @@ namespace DFUVR
                 else
                 {
                     idleParent = GameObject.Find("IdleParent");
-
                 }
 
                 vrui.transform.SetParent(idleParent.transform);
                 laserPointer.transform.SetParent(idleParent.transform);
-                vrui.transform.localPosition=Vector3.zero;
+                vrui.transform.localPosition = Vector3.zero;
                 vrui.transform.localRotation = Quaternion.identity;
                 laserPointer.transform.localPosition = Vector3.zero;
             }
-
         }
-
     }
+
     //handles most vr input, calibration mode and fixes some necessary settings.
     [HarmonyPatch(typeof(InputManager), "Update")]
     public class ControllerPatch : MonoBehaviour
@@ -517,12 +504,12 @@ namespace DFUVR
         public static bool flag = false;
         public static bool isChanging = false;
         private static bool changedCam = false;
-        public static bool bindingCalibrated=false;
+        public static bool bindingCalibrated = false;
+
         [HarmonyPrefix]
-        
         static void Prefix(InputManager __instance)
         {
-            __instance.EnableController=false;
+            __instance.EnableController = false;
             Screen.fullScreen = true;
 
             //the default bindings. I'll move this somewhere else later. This really shouldn't be in update.
@@ -538,19 +525,15 @@ namespace DFUVR
             //handles the player collision and makes it room scale
             if (Var.charControllerCalibrated)
             {
-                Var.characterController.center = new Vector3(Var.VRCamera.transform.localPosition.x+Var.VRParent.transform.localPosition.x, Var.characterController.center.y, Var.VRCamera.transform.localPosition.z + Var.VRParent.transform.localPosition.z);
+                Var.characterController.center = new Vector3(Var.VRCamera.transform.localPosition.x + Var.VRParent.transform.localPosition.x, Var.characterController.center.y, Var.VRCamera.transform.localPosition.z + Var.VRParent.transform.localPosition.z);
             }
-            else if (!Var.charControllerCalibrated&&Var.characterController!=null)
+            else if (!Var.charControllerCalibrated && Var.characterController != null)
             {
                 if (GameManager.Instance.IsPlayingGame())
                 {
                     CoroutineRunner.Instance.StartCoroutine(Waiter2());
                     //GameObject.Find("PLayerAdvanced").AddComponent<MeshFilter>();
-                    
-
-
                 }
-
             }
             //if (Input.GetKeyDown(KeyCode.L))
             //{
@@ -576,7 +559,6 @@ namespace DFUVR
 
                 Vector2 rThumbStick;
                 rightHand.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out rThumbStick);
-                
 
                 float inputX1 = rThumbStick.x;
                 float inputY1 = rThumbStick.y;
@@ -590,17 +572,14 @@ namespace DFUVR
                 GameObject vrparent = GameObject.Find("VRParent");
                 vrparent.transform.localPosition = new Vector3(vrparent.transform.localPosition.x, (float)Var.heightOffset, vrparent.transform.localPosition.z);
             }
+
             if (Input.GetKeyDown(Var.left2Button))
             {
-
                 //Debug.Log("§");
                 flag = true;
                 Var.debugInt += 1;
-
-
-
             }
-            
+
             //we don't want to open the pause menu when the user just wants to recalibrate
             if (flag) { InputManager.Instance.SetBinding(KeyCode.Escape, Actions.Escape, true); }
             else if (!flag) { InputManager.Instance.SetBinding(Var.left1Button, Actions.Escape, true); }
@@ -610,10 +589,8 @@ namespace DFUVR
             {
                 //Debug.Log("WOMBO COMBO");
                 isChanging = true;
-
-
-
             }
+
             if ((Input.GetKeyUp(Var.left1Button) || Input.GetKeyUp(Var.left2Button)) && flag)
             {
                 //Debug.Log("canceled");
@@ -635,47 +612,49 @@ namespace DFUVR
                 {
                     flag = true;
                     Var.debugInt += 1;
-
                 }
+
                 if (secondaryPressed && flag)
                 {
                     isChanging = true;
                 }
-                if ((!primaryPressed || !secondaryPressed) && flag) 
+
+                if ((!primaryPressed || !secondaryPressed) && flag)
                 {
                     //Debug.Log("canceled");
                     flag = false;
                     isChanging = false;
                     Var.SaveHeight();
-
                 }
-
             }
             //snap turning
             SnapTurnProvider.Snap();
 
-            
             GameObject exterior = GameObject.Find("Exterior");
 
             //this atleast creates a sense of day and night
-            if (exterior != null )//&& Var.skyboxToggle)
+            if (exterior != null)//&& Var.skyboxToggle)
             {
                 //Plugin.LoggerInstance.LogInfo(exterior.activeSelf);
                 Var.VRCamera.clearFlags = CameraClearFlags.Nothing;
             }
-            else { Var.VRCamera.clearFlags = CameraClearFlags.Skybox; }
-            if (!bindingCalibrated) 
+            else
+            {
+                Var.VRCamera.clearFlags = CameraClearFlags.Skybox;
+            }
+
+            if (!bindingCalibrated)
             {
                 AccessTools.Method(typeof(InputManager), "UpdateBindingCache").Invoke(__instance, null);
                 //__instance.UpdateBindingCache();
                 bindingCalibrated = true;
-
             }
-            
+
             //Plugin.LoggerInstance.LogInfo(Time.fixedDeltaTime);
-            
         }
-        public static IEnumerator Waiter2() {
+
+        public static IEnumerator Waiter2()
+        {
             //Plugin.LoggerInstance.LogInfo("Coroutine 2");
             yield return new WaitForSecondsRealtime(1);
             Var.charControllerCalibrated = true;
@@ -735,6 +714,7 @@ namespace DFUVR
     //    }
 
     //}
+
     [HarmonyPatch(typeof(DaggerfallBillboard), "Start")]
     public class BillboardDirectionPatch : MonoBehaviour
     {
@@ -742,10 +722,7 @@ namespace DFUVR
         static void Postfix(DaggerfallBillboard __instance)
         {
             AccessTools.Field(typeof(DaggerfallBillboard), "mainCamera").SetValue(__instance, Var.VRCamera);
-
-
         }
-
     }
 
     //The Skybox hurts in the eyes as it's just a static image with a wrong depth. It's better to remove it for now
@@ -764,7 +741,6 @@ namespace DFUVR
             {
                 return true;
             }
-
         }
     }
     [HarmonyPatch(typeof(InputManager), "GetUIScrollMovement")]
@@ -780,7 +756,6 @@ namespace DFUVR
             Vector2 lThumbStick;
             rightHand.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out lThumbStick);
 
-            
             float vertical = lThumbStick.y;
 
             __result = vertical;
@@ -792,7 +767,7 @@ namespace DFUVR
     public class LevitationPatch
     {
         [HarmonyPrefix]
-        static void Prefix(LevitateMotor __instance) 
+        static void Prefix(LevitateMotor __instance)
         {
             //float inputX1 = Input.GetAxis("Axis1");
             //float inputY1 = Input.GetAxis("Axis2");
@@ -805,19 +780,19 @@ namespace DFUVR
             Vector2 lThumbStick;
             leftHand.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out lThumbStick);
 
-            float inputX1=lThumbStick.x;
-            float inputY1=lThumbStick.y;
+            float inputX1 = lThumbStick.x;
+            float inputY1 = lThumbStick.y;
 
-            PlayerMotor playerMotor=(PlayerMotor)AccessTools.Field(typeof(LevitateMotor),"playerMotor").GetValue(__instance);
-            Camera playerCamera=Var.VRCamera;
-            PlayerGroundMotor groundMotor =(PlayerGroundMotor)AccessTools.Field(typeof(LevitateMotor),"groundMotor").GetValue(__instance);
+            PlayerMotor playerMotor = (PlayerMotor)AccessTools.Field(typeof(LevitateMotor), "playerMotor").GetValue(__instance);
+            Camera playerCamera = Var.VRCamera;
+            PlayerGroundMotor groundMotor = (PlayerGroundMotor)AccessTools.Field(typeof(LevitateMotor), "groundMotor").GetValue(__instance);
 
             if (inputX1 != 0.0f || inputY1 != 0.0f)
             {
                 float inputModifyFactor = (inputX1 != 0.0f && inputY1 != 0.0f && playerMotor.limitDiagonalSpeed) ? .7071f : 1.0f;
                 try
                 {
-                    AccessTools.Method(typeof(LevitateMotor), "AddMovement").Invoke(__instance, new object[] { playerCamera.transform.TransformDirection(new Vector3(inputX1 * inputModifyFactor, 0, inputY1 * inputModifyFactor)),false });
+                    AccessTools.Method(typeof(LevitateMotor), "AddMovement").Invoke(__instance, new object[] { playerCamera.transform.TransformDirection(new Vector3(inputX1 * inputModifyFactor, 0, inputY1 * inputModifyFactor)), false });
                 }
                 catch { Plugin.LoggerInstance.LogError("Error levitating"); }
                 //AddMovement(playerCamera.transform.TransformDirection(new Vector3(inputX * inputModifyFactor, 0, inputY * inputModifyFactor)));
@@ -828,10 +803,9 @@ namespace DFUVR
             //Plugin.LoggerInstance.LogInfo((Vector3)AccessTools.Field(typeof(LevitateMotor), "moveDirection").GetValue(__instance));
 
             //moveDirection = Vector3.zero;
-
-
         }
     }
+
     //fixes Arrow and spell directions
     [HarmonyPatch(typeof(DaggerfallMissile), "GetAimDirection")]
     public class MissileDirectionPatch
@@ -839,7 +813,6 @@ namespace DFUVR
         [HarmonyPostfix]
         static void Postfix(DaggerfallMissile __instance, ref Vector3 __result)
         {
-            
             if (__instance.CustomAimDirection != Vector3.zero)
             {
                 __result = __instance.CustomAimDirection;
@@ -871,10 +844,10 @@ namespace DFUVR
                     aimDirection += Vector3.down * 0.05f;
             }
 
-           
             __result = aimDirection;
         }
     }
+
     //fixes Arrow and spell position
     [HarmonyPatch(typeof(DaggerfallMissile), "GetAimPosition")]
     public class MissilePositionPatch
@@ -895,9 +868,7 @@ namespace DFUVR
             {
                 aimPosition = Var.rightHand.transform.position;
             }
-            
 
-            
             __result = aimPosition;
         }
     }
@@ -910,11 +881,11 @@ namespace DFUVR
         {
             RaycastHit hit;
 
-            Ray ray = new Ray(Var.rightHand.transform.position,Var.rightHand.transform.forward);
+            Ray ray = new Ray(Var.rightHand.transform.position, Var.rightHand.transform.forward);
             if (Physics.SphereCast(ray, 0.25f, out hit, 3.0f))
-                __result= hit.transform.GetComponent<DaggerfallEntityBehaviour>();
+                __result = hit.transform.GetComponent<DaggerfallEntityBehaviour>();
             else
-                __result= null;
+                __result = null;
 
             return false;
         }
@@ -922,7 +893,7 @@ namespace DFUVR
 
     //makes stuff like doors interacteable
     [HarmonyPatch(typeof(PlayerActivate), "Update")]
-    public class PlayerActivatePatch : MonoBehaviour 
+    public class PlayerActivatePatch : MonoBehaviour
     {
         [HarmonyPrefix]
         static void Prefix(PlayerActivate __instance)
@@ -931,12 +902,11 @@ namespace DFUVR
             //InputManager.Instance.SetBinding(KeyCode.UpArrow, InputManager.Actions.ToggleConsole, true);
             //InputManager.Instance.SetBinding(Var.acceptButton, InputManager.Actions.ActivateCenterObject, true);
             //InputManager.Instance.SetBinding(Var.cancelButton, InputManager.Actions.Inventory, true);
-            
-            AccessTools.Field(typeof(PlayerActivate), "mainCamera").SetValue(__instance, Var.handCam);
 
+            AccessTools.Field(typeof(PlayerActivate), "mainCamera").SetValue(__instance, Var.handCam);
         }
-    
     }
+
     //Sets reference for later use
     [HarmonyPatch(typeof(ClimbingMotor), "Start")]
     public class ClimbingMotorStartPatch
@@ -944,6 +914,7 @@ namespace DFUVR
         [HarmonyPostfix]
         static void Postfix(ClimbingMotor __instance) { Var.climbingMotor = __instance; }
     }
+
     //Sets reference for later use
     [HarmonyPatch(typeof(WeaponManager), "Start")]
     public class WeaponManagerStartPatch
@@ -951,26 +922,28 @@ namespace DFUVR
         [HarmonyPostfix]
         static void Postfix(WeaponManager __instance) { Var.weaponManager = __instance; }
     }
+
     //fixes bows
     [HarmonyPatch(typeof(WeaponManager), "Update")]
-    public class BowPatch:MonoBehaviour
+    public class BowPatch : MonoBehaviour
     {
         [HarmonyPostfix]
-        static void Prefix(WeaponManager __instance) 
+        static void Prefix(WeaponManager __instance)
         {
             #region Fields
-            PlayerEntity playerEntity =(PlayerEntity)AccessTools.Field(typeof(WeaponManager), "playerEntity").GetValue(__instance);
+            PlayerEntity playerEntity = (PlayerEntity)AccessTools.Field(typeof(WeaponManager), "playerEntity").GetValue(__instance);
             DaggerfallUnityItem lastBowUsed = (DaggerfallUnityItem)AccessTools.Field(typeof(WeaponManager), "lastBowUsed").GetValue(__instance);
             bool usingRightHand = (bool)AccessTools.Field(typeof(WeaponManager), "usingRightHand").GetValue(__instance);
             DaggerfallUnityItem currentRightHandWeapon = (DaggerfallUnityItem)AccessTools.Field(typeof(WeaponManager), "currentRightHandWeapon").GetValue(__instance);
             DaggerfallUnityItem currentLeftHandWeapon = (DaggerfallUnityItem)AccessTools.Field(typeof(WeaponManager), "currentLeftHandWeapon").GetValue(__instance);
             #endregion
-            if (!__instance.Sheathed) {
+            if (!__instance.Sheathed)
+            {
                 if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Bow)
                 {
                     if (Input.GetKeyDown(Var.indexButton))
                     {
-                        
+
                         DaggerfallMissile missile = Instantiate(__instance.ArrowMissilePrefab);
                         if (missile)
                         {
@@ -990,10 +963,11 @@ namespace DFUVR
                             //Plugin.LoggerInstance.LogInfo("Bow used");
                         }
                     }
-            } }
-        
+                }
+            }
         }
     }
+
     //Grants skill points whenever the player hits an enemy
     [HarmonyPatch(typeof(WeaponManager), "WeaponDamage")]
     public class ExperiencePatch : MonoBehaviour
@@ -1001,7 +975,7 @@ namespace DFUVR
         [HarmonyPostfix]
         static void Postfix(WeaponManager __instance)
         {
-            
+
             PlayerEntity playerEntity = (PlayerEntity)AccessTools.Field(typeof(WeaponManager), "playerEntity").GetValue(__instance);
             DaggerfallUnityItem currentRightHandWeapon = (DaggerfallUnityItem)AccessTools.Field(typeof(WeaponManager), "currentRightHandWeapon").GetValue(__instance);
             DaggerfallUnityItem currentLeftHandWeapon = (DaggerfallUnityItem)AccessTools.Field(typeof(WeaponManager), "currentLeftHandWeapon").GetValue(__instance);
@@ -1016,91 +990,73 @@ namespace DFUVR
             playerEntity.TallySkill(DFCareer.Skills.CriticalStrike, 1);
             //Plugin.LoggerInstance.LogInfo("Experience probably granted");
         }
-    
     }
 
-
-    //
     [HarmonyPatch(typeof(WeaponManager), "ToggleSheath")]
     public class CorrectWeaponPatch : MonoBehaviour
     {
         [HarmonyPrefix]
         static void Prefix(WeaponManager __instance)
         {
-            
             //Plugin.LoggerInstance.LogInfo("Entered this method");
-            if (__instance.Sheathed) 
+            if (__instance.Sheathed)
             {
                 Var.sheathObject.GetComponent<MeshRenderer>().enabled = true;
                 Destroy(Var.weaponObject);
                 Hands.rHand.SetActive(false);
                 Hands.lHand.SetActive(false);
-                GameObject tempObject=null;
+                GameObject tempObject = null;
 
-                if (__instance.ScreenWeapon.WeaponType == WeaponTypes.LongBlade|| __instance.ScreenWeapon.WeaponType == WeaponTypes.LongBlade_Magic)
+                if (__instance.ScreenWeapon.WeaponType == WeaponTypes.LongBlade || __instance.ScreenWeapon.WeaponType == WeaponTypes.LongBlade_Magic)
                 {
                     //Plugin.LoggerInstance.LogInfo("We're here 1");
                     tempObject = Var.sword;
-                    
                     //
                     //if (tempObject != null) { Plugin.LoggerInstance.LogInfo("found sword"); }
-
-
-
-
                 }
-                else if(__instance.ScreenWeapon.WeaponType==WeaponTypes.Dagger|| __instance.ScreenWeapon.WeaponType == WeaponTypes.Dagger_Magic|| __instance.ScreenWeapon.WeaponType == WeaponTypes.Dagger)
+                else if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Dagger || __instance.ScreenWeapon.WeaponType == WeaponTypes.Dagger_Magic || __instance.ScreenWeapon.WeaponType == WeaponTypes.Dagger)
                 {
                     //Plugin.LoggerInstance.LogInfo("We're here 2");
                     tempObject = Var.dagger;
                     //tempObject.transform.rotation = Quaternion.Euler(0, 90, 90);
-                    
-                    
-
                 }
-                else if(__instance.ScreenWeapon.WeaponType==WeaponTypes.Battleaxe|| __instance.ScreenWeapon.WeaponType == WeaponTypes.Battleaxe_Magic)
+                else if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Battleaxe || __instance.ScreenWeapon.WeaponType == WeaponTypes.Battleaxe_Magic)
                 {
                     //Plugin.LoggerInstance.LogInfo("We're here 3");
                     tempObject = Var.battleaxe;
                     //Var.dagger.transform.rotation = Quaternion.Euler(0, 90, -90);
                     //Var.weaponObject.transform.localPosition = Vector3.zero;
                     //Var.weaponObject.transform.localRotation = Quaternion.Euler(0, 180, 180);
-
-
                 }
-                else if(__instance.ScreenWeapon.WeaponType == WeaponTypes.Mace || __instance.ScreenWeapon.WeaponType == WeaponTypes.Mace_Magic||__instance.ScreenWeapon.WeaponType==WeaponTypes.Flail||__instance.ScreenWeapon.WeaponType==WeaponTypes.Flail_Magic)
+                else if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Mace || __instance.ScreenWeapon.WeaponType == WeaponTypes.Mace_Magic || __instance.ScreenWeapon.WeaponType == WeaponTypes.Flail || __instance.ScreenWeapon.WeaponType == WeaponTypes.Flail_Magic)
                 {
                     tempObject = Var.mace;
-
                 }
                 else if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Bow)
                 {
                     tempObject = Var.bow;
                     //AccessTools.Method(typeof(WeaponManager), "ToggleHand").Invoke(__instance, null);
                 }
-
-                else if(__instance.ScreenWeapon.WeaponType==WeaponTypes.Warhammer|| __instance.ScreenWeapon.WeaponType == WeaponTypes.Warhammer_Magic)
+                else if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Warhammer || __instance.ScreenWeapon.WeaponType == WeaponTypes.Warhammer_Magic)
                 {
-                    tempObject=Var.hammer;
+                    tempObject = Var.hammer;
                 }
-                else if(__instance.ScreenWeapon.WeaponType == WeaponTypes.Staff || __instance.ScreenWeapon.WeaponType == WeaponTypes.Staff_Magic)
+                else if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Staff || __instance.ScreenWeapon.WeaponType == WeaponTypes.Staff_Magic)
                 {
                     //Plugin.LoggerInstance.LogInfo("Staff");
-                    tempObject=Var.staff;
+                    tempObject = Var.staff;
                 }
-                else if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Melee||__instance.ScreenWeapon.WeaponType == WeaponTypes.Werecreature)
+                else if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Melee || __instance.ScreenWeapon.WeaponType == WeaponTypes.Werecreature)
                 {
                     tempObject = Var.meleeHandR;
                 }
-
                 else
                 {
                     //Plugin.LoggerInstance.LogInfo("We're here");
                     tempObject = Var.elseA;//If we don't find the appropriate wepaon type we give the user a placeholder weapon. This should never happen, unless I fucked up
                 }
                 //Plugin.LoggerInstance.LogInfo("Exited this method. Probably sucessfully");
-                
-                
+
                 Hands.rHand.SetActive(false);
                 Hands.lHand.SetActive(false);
                 Var.weaponObject = Instantiate(tempObject);
@@ -1113,17 +1069,13 @@ namespace DFUVR
                 }
                 if (tempObject == Var.sword)
                 {
-
                     Var.weaponObject.transform.localPosition = Vector3.zero;
                     Var.weaponObject.transform.localRotation = Quaternion.identity;
-
                 }
-                if (tempObject == Var.hammer)
+                else if (tempObject == Var.hammer)
                 {
-
                     Var.weaponObject.transform.localPosition = Vector3.zero;
-                    Var.weaponObject.transform.localRotation = Quaternion.Euler(0,0,90);
-
+                    Var.weaponObject.transform.localRotation = Quaternion.Euler(0, 0, 90);
                 }
                 else if (tempObject == Var.dagger)
                 {
@@ -1133,14 +1085,12 @@ namespace DFUVR
                 }
                 else if (tempObject == Var.mace)
                 {
-
                     //Var.weaponObject.transform.localPosition= Vector3.zero;
                     Var.weaponObject.transform.localPosition = new Vector3(0, 0, 0.1f);
                     Var.weaponObject.transform.localRotation = Quaternion.Euler(90, 0, 0);
                 }
                 else if (tempObject == Var.battleaxe)
                 {
-
                     //Var.weaponObject.transform.localPosition= Vector3.zero;
                     Var.weaponObject.transform.localPosition = new Vector3(0, 0, 0);
                     Var.weaponObject.transform.localRotation = Quaternion.Euler(0, -90, 90);
@@ -1157,16 +1107,11 @@ namespace DFUVR
                 }
                 else if (tempObject == Var.meleeHandR)
                 {
-                    Var.weaponObject.transform.localPosition = new Vector3(0,0,-0.05f);
-
+                    Var.weaponObject.transform.localPosition = new Vector3(0, 0, -0.05f);
                     Var.weaponObject.transform.localRotation = Quaternion.Euler(20, 10, 270);
                 }
-                    //else if(tempObject==Var.)
-
-
 
                 Var.weaponObject.SetActive(true);
-
             }
             //this sucks... but it'll do for now
             else
@@ -1187,7 +1132,6 @@ namespace DFUVR
                     {
                         Var.sheathObject.GetComponent<MeshRenderer>().enabled = true;
                         Var.weaponObject.transform.localRotation = Quaternion.Euler(0, 90, 90);
-
                     }
                     else if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Battleaxe || __instance.ScreenWeapon.WeaponType == WeaponTypes.Battleaxe_Magic)
                     {
@@ -1200,7 +1144,7 @@ namespace DFUVR
                         Var.weaponObject.transform.localRotation = Quaternion.Euler(90, 0, 0);
                         Var.weaponObject.transform.localPosition = new Vector3(0, 0, 0.1f);
                     }
-                    else if(__instance.ScreenWeapon.WeaponType == WeaponTypes.Warhammer || __instance.ScreenWeapon.WeaponType == WeaponTypes.Warhammer_Magic)
+                    else if (__instance.ScreenWeapon.WeaponType == WeaponTypes.Warhammer || __instance.ScreenWeapon.WeaponType == WeaponTypes.Warhammer_Magic)
                     {
                         Var.sheathObject.GetComponent<MeshRenderer>().enabled = false;
                         Var.weaponObject.transform.localRotation = Quaternion.identity;
@@ -1215,14 +1159,12 @@ namespace DFUVR
                     {
                         Var.sheathObject.GetComponent<MeshRenderer>().enabled = false;
                         Var.weaponObject.transform.localRotation = Quaternion.Euler(270, 90, 0);
-
                     }
-                    
+
                     //Var.weaponObject.transform.localRotation = Quaternion.identity;
                 }
                 Hands.rHand.SetActive(true);
                 Hands.lHand.SetActive(true);
-
             }
 
             ////it didn't do for now D:
@@ -1240,10 +1182,9 @@ namespace DFUVR
             //    Hands.lHand.SetActive(true);
 
             //}
-
         }
-
     }
+
     //fixes the billboard orientation of enemies
     [HarmonyPatch(typeof(DaggerfallMobileUnit), "Update")]
     public class UnitOrientationPatch : MonoBehaviour
@@ -1251,22 +1192,16 @@ namespace DFUVR
         [HarmonyPrefix]
         static void Prefix(DaggerfallMobileUnit __instance)
         {
-            
             AccessTools.Field(typeof(DaggerfallMobileUnit), "mainCamera").SetValue(__instance, Var.VRCamera);
-
         }
-
     }
-
-
-
 
     //hard binds the thumbsticks to player movement. Makes movement smooth in all directions
     [HarmonyPatch(typeof(FrictionMotor), "GroundedMovement")]
     public class GroundedMovementPatch : MonoBehaviour
     {
         [HarmonyPrefix]
-        static bool Prefix(FrictionMotor __instance, ref Vector3 moveDirection) 
+        static bool Prefix(FrictionMotor __instance, ref Vector3 moveDirection)
         {
             #region Fields
             bool sliding = (bool)AccessTools.Field(typeof(FrictionMotor), "sliding").GetValue(__instance);
@@ -1277,7 +1212,6 @@ namespace DFUVR
             //SetSliding();
             AccessTools.Method(typeof(FrictionMotor), "SetSliding").Invoke(__instance, null);
 
-            
             if ((sliding && __instance.slideWhenOverSlopeLimit) || (__instance.slideOnTaggedObjects && hit.collider.tag == "Slide"))
             {
                 Vector3 hitNormal = hit.normal;
@@ -1287,10 +1221,8 @@ namespace DFUVR
                 AccessTools.Field(typeof(FrictionMotor), "playerControl").SetValue(__instance, false);
                 playerControl = false;
             }
-            
             else
             {
-
                 //float inputX = Input.GetAxis("Axis1");
                 //float inputY = Input.GetAxis("Axis2");
                 //float inputX = Input.GetAxis(Var.lThumbStickHorizontal);
@@ -1304,12 +1236,12 @@ namespace DFUVR
                 float inputX = lThumbStick.x;
                 float inputY = lThumbStick.y;
 
-
                 if (GameManager.Instance.PlayerEntity.IsParalyzed)
                 {
                     inputX = 0;
                     inputY = 0;
                 }
+
                 GameObject vrcamera = GameObject.Find("VRCamera");
                 //float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && playerMotor.limitDiagonalSpeed) ? .7071f : 1.0f;
                 //it's really disorienting in vr when the player moves faster in one direction than the other.
@@ -1319,44 +1251,36 @@ namespace DFUVR
                 AccessTools.Field(typeof(FrictionMotor), "playerControl").SetValue(__instance, true);
                 playerControl = true;
 
-
                 if (!GameManager.Instance.PlayerEntity.IsParalyzed)
-                {
                     AccessTools.Method(typeof(FrictionMotor), "HeadDipHandling").Invoke(__instance, null);
-                }
             }
             //Plugin.LoggerInstance.LogInfo($"sliding: {sliding}, hit: {hit}, playerControl: {playerControl}, moveDirection: {moveDirection}");
             return false;
-            
-
         }
     }
 
-    [HarmonyPatch(typeof(PlayerFootsteps),"FixedUpdate")]
+    [HarmonyPatch(typeof(PlayerFootsteps), "FixedUpdate")]
     //this is to fix the annoying bug with an infinite amount of footstep sounds playing all at once
     public class FootstepPatch
     {
         public static float cooldown = 0.1f;
-        private static float lastStepTime=0;
+        private static float lastStepTime = 0;
         [HarmonyPrefix]
-        static bool Prefix(PlayerFootsteps __instance) 
+        static bool Prefix(PlayerFootsteps __instance)
         {
             if (Time.time - lastStepTime < cooldown)
-            {
                 return false;
-            }
+
             lastStepTime = Time.time;
             return true;
-
-        
         }
     }
     //fixes the automap orientation. Automap is currently not bound to any key though
     [HarmonyPatch(typeof(Automap), "UpdateAutomapStateOnWindowPush")]
-    public class AutomapPatch : MonoBehaviour 
+    public class AutomapPatch : MonoBehaviour
     {
         [HarmonyPrefix]
-        static void Prefix(Automap __instance) 
+        static void Prefix(Automap __instance)
         {
             #region Fields
             GameObject gameObjectPlayerAdvanced = (GameObject)AccessTools.Field(typeof(Automap), "gameObjectPlayerAdvanced").GetValue(__instance);
@@ -1366,7 +1290,7 @@ namespace DFUVR
             #endregion
             AccessTools.Method(typeof(Automap), "CreateTeleporterMarkers").Invoke(__instance, null);
             //CreateTeleporterMarkers();
-            AccessTools.Method(typeof(Automap), "SetActivationStateOfMapObjects").Invoke(__instance, new object[]{true});
+            AccessTools.Method(typeof(Automap), "SetActivationStateOfMapObjects").Invoke(__instance, new object[] { true });
             //SetActivationStateOfMapObjects(true);
 
             GameObject vrCamera = GameObject.Find("VRCamera");
@@ -1388,22 +1312,19 @@ namespace DFUVR
             AccessTools.Method(typeof(Automap), "UpdateSlicingPositionY").Invoke(__instance, null);
             return;
             //UpdateSlicingPositionY();
-
         }
-        
-    
     }
 
-    [HarmonyPatch(typeof(HUDCompass),"Update")]
+    [HarmonyPatch(typeof(HUDCompass), "Update")]
     public class CompassPatch
     {
         [HarmonyPrefix]
         static void Prefix(HUDCompass __instance)
         {
             AccessTools.Field(typeof(HUDCompass), "compassCamera").SetValue(__instance, Var.VRCamera);
-
         }
     }
+
     //[HarmonyPatch(typeof(ClimbingMotor), "GetClimbedWallInfo")]
     //public static class Patch_GetClimbedWallInfo
     //{
@@ -1440,6 +1361,7 @@ namespace DFUVR
         //        Plugin.LoggerInstance.LogInfo($"{field.Name}: {value}");
         //    }
         //}
+
         [HarmonyPrefix]
         static bool Prefix(ClimbingMotor __instance)
         {
@@ -1496,7 +1418,9 @@ namespace DFUVR
                                           || InputManager.Instance.HasAction(InputManager.Actions.Jump));
                 }
                 else
+                {
                     inputAbortCondition = !inputForward;
+                }
 
                 // reset for next use
                 //WallEject = false;
@@ -1515,7 +1439,7 @@ namespace DFUVR
 
                 bool horizontallyStationary = Vector2.Distance(lastHorizontalPosition, new Vector2(controller.transform.position.x, controller.transform.position.z)) < startClimbHorizontalTolerance;
                 //bool touchingSides = (playerMotor.CollisionFlags & CollisionFlags.Sides) != 0;
-                bool touchingSides = (Physics.Raycast(Var.VRCamera.transform.position,Var.VRCamera.transform.forward,0.5f));
+                bool touchingSides = (Physics.Raycast(Var.VRCamera.transform.position, Var.VRCamera.transform.forward, 0.5f));
                 bool touchingGround = (playerMotor.CollisionFlags & CollisionFlags.Below) != 0;
                 //bool touchingAbove = (playerMotor.CollisionFlags & CollisionFlags.Above) != 0;
                 bool slippedToGround = isSlipping && touchingGround;
@@ -1560,7 +1484,9 @@ namespace DFUVR
                     //Debug.Log("Forced touchingSides...");
                 }
                 else
+                {
                     AccessTools.Field(typeof(ClimbingMotor), "isClimbing").SetValue(__instance, false);
+                }
                 //touchingSidesRestoreForce = false;
 
                 // Should we reset climbing starter timers?
@@ -1578,13 +1504,12 @@ namespace DFUVR
                 //    Plugin.LoggerInstance.LogInfo("nonOrthogonalStart " + (nonOrthogonalStart));
                 //    Plugin.LoggerInstance.LogInfo("hangTouchNonVertical " + (hangTouchNonVertical));
                 //}
-                if (!(Physics.Raycast(Var.VRCamera.transform.position-new Vector3(0,1,0), Var.VRCamera.transform.forward, 0.5f)))
+                if (!(Physics.Raycast(Var.VRCamera.transform.position - new Vector3(0, 1, 0), Var.VRCamera.transform.forward, 0.5f)))
                 {
                     __instance.StopClimbing();
                     releasedFromCeiling = false;
-
-
                 }
+
                 if ((!pushingFaceAgainstWallNearCeiling)
                     &&
                     (inputAbortCondition
@@ -1611,7 +1536,6 @@ namespace DFUVR
                     // Reset position for horizontal distance check and timer to wait for climbing start
                     lastHorizontalPosition = new Vector2(controller.transform.position.x, controller.transform.position.z);
                 }
-
                 else // countdown climbing events
                 {
                     // countdown to climbing start
@@ -1650,14 +1574,10 @@ namespace DFUVR
                     {
                         float result;
                         if (isSlipping)
-                        {
-
                             result = (float)AccessTools.Field(typeof(ClimbingMotor), "regainHoldSkillCheckFrequency").GetValue(__instance);
-                        }
                         else
-                        {
                             result = 15f;
-                        }
+
                         // countdown to climb update, Faster updates if slipping
                         if ((float)AccessTools.Field(typeof(ClimbingMotor), "climbingContinueTimer").GetValue(__instance) <= (playerMotor.systemTimerUpdatesDivisor * (result)))
                         {
@@ -1665,7 +1585,6 @@ namespace DFUVR
                             AccessTools.Field(typeof(ClimbingMotor), "climbingContinueTimer").SetValue(__instance, current + Time.deltaTime);
                             //climbingContinueTimer += Time.deltaTime;
                         }
-
                         else
                         {
                             AccessTools.Field(typeof(ClimbingMotor), "climbingContinueTimer").SetValue(__instance, 0);
@@ -1686,7 +1605,6 @@ namespace DFUVR
                                 isSlipping = !__instance.ClimbingSkillCheck(50);
                         }
                     }
-
                 }
 
                 // Climbing Cycle
@@ -1722,11 +1640,14 @@ namespace DFUVR
                 //Plugin.LoggerInstance.LogInfo(__instance.IsClimbing);
                 return false;
             }
-            catch (Exception e) { Plugin.LoggerInstance.LogError(e); return true; }
-
-
+            catch (Exception e)
+            {
+                Plugin.LoggerInstance.LogError(e);
+                return true;
+            }
         }
     }
+
     //we don't want mouse controls
     [HarmonyPatch(typeof(PlayerMouseLook), "Update")]
     public class MousePatch : MonoBehaviour
@@ -1736,17 +1657,15 @@ namespace DFUVR
         static bool Prefix(PlayerMouseLook __instance)
         {
             return false;
-        
         }
     }
+
     //extra bindings because VR controllers don't have a lot of buttons
     [HarmonyPatch(typeof(InputManager), "FindKeyboardActions")]
     public class BindingPatch : MonoBehaviour
     {
-
         //private static bool isCrouching = false;
         [HarmonyPrefix]
-        
         static void Prefix(InputManager __instance)
         {
             if (!ControllerPatch.isChanging)
@@ -1757,11 +1676,10 @@ namespace DFUVR
                 //float inputY = Input.GetAxis(Var.rThumbStickVertical);
                 var rightHand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
                 //if (Var.leftHanded) { rightHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand); }
-                
 
                 Vector2 rThumbStick;
                 rightHand.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out rThumbStick);
-                
+
                 float inputX = rThumbStick.x;
                 float inputY = rThumbStick.y;
                 if (!Var.climbingMotor.IsClimbing)
@@ -1769,7 +1687,6 @@ namespace DFUVR
                     if (inputY >= 0.8f)
                     {
                         currentActions.Add(Actions.Jump);
-
                     }
                     else if (inputY <= -0.8f && !(Time.time - Var.lastCrouchTime < Var.crouchCooldown))
                     {
@@ -1779,7 +1696,6 @@ namespace DFUVR
                         try
                         {
                             playerMotor = GameObject.Find("PlayerAdvanced").GetComponent<PlayerMotor>();//Var.playerGameObject.GetComponent<PlayerMotor>();
-
                         }
                         catch { Plugin.LoggerInstance.LogError("PlayerMotorNotFound"); }
                         //if (playerMotor != null)
@@ -1790,12 +1706,10 @@ namespace DFUVR
                         if (playerMotor.IsCrouching == true)
                         {
                             currentActions.Add(Actions.StealMode);
-
                         }
                         else
                         {
                             currentActions.Add(Actions.GrabMode);
-
                         }
                         Var.lastCrouchTime = Time.time;
                         //isCrouching=!isCrouching;
@@ -1818,13 +1732,12 @@ namespace DFUVR
                     {
                         currentActions.Add(Actions.MoveRight);
                     }
-                    if (inputX <= -0.5f)
+                    else if (inputX <= -0.5f)
                     {
                         currentActions.Add(Actions.MoveLeft);
                     }
-
-
                 }
+
                 //if (Input.GetKeyDown(Var.gripButton)&&!ControllerPatch.flag) 
                 //{ 
                 //    currentActions.Add(Actions.ActivateCenterObject);
@@ -1834,24 +1747,19 @@ namespace DFUVR
                 //if (Var.leftHanded) { leftHand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand); }
                 //else
                 //{
-                    //leftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+                //leftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
                 //}
                 bool gripButton;
-                if (Var.leftHanded) { leftHand.TryGetFeatureValue(CommonUsages.gripButton, out gripButton); }
+                if (Var.leftHanded)
+                    leftHand.TryGetFeatureValue(CommonUsages.gripButton, out gripButton);
                 else
-                {  
                     rightHand.TryGetFeatureValue(CommonUsages.gripButton, out gripButton);
-                }
-                if (gripButton && !ControllerPatch.flag&&!Var.climbingMotor.IsClimbing)
-                {
-                    currentActions.Add(Actions.ActivateCenterObject);
-                    //currentActions.Add(Actions.);
 
-                }
+                if (gripButton && !ControllerPatch.flag && !Var.climbingMotor.IsClimbing)
+                    currentActions.Add(Actions.ActivateCenterObject);
                 else if (gripButton && !ControllerPatch.flag && Var.climbingMotor.IsClimbing)
-                {
                     currentActions.Add(Actions.Jump);
-                }
+
                 //if(Input.GetKeyDown(Var.acceptButton) && !ControllerPatch.flag)
                 //{
                 //    currentActions.Add(Actions.CharacterSheet);
@@ -1869,26 +1777,16 @@ namespace DFUVR
                 if (ControllerPatch.flag)
                 {
                     if (Input.GetKeyDown(Var.acceptButton))
-                    {
                         currentActions.Add(Actions.TravelMap);
-                    }
                     else if (Input.GetKeyDown(Var.cancelButton))
-                    {
                         currentActions.Add(Actions.LogBook);
-                    }
                     else if (Input.GetKeyDown(Var.gripButton))
-                    {
                         currentActions.Add(Actions.Rest);
-                    }
                     else if (Input.GetKeyDown(Var.lGripButton))
-                    {
                         currentActions.Add(Actions.Transport);
-                    }
-                    if (Var.rTriggerDone)
-                    {
-                        currentActions.Add(Actions.AutoMap);
 
-                    }
+                    if (Var.rTriggerDone)
+                        currentActions.Add(Actions.AutoMap);
 
                     //var leftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
 
@@ -1896,9 +1794,7 @@ namespace DFUVR
                     leftHand.TryGetFeatureValue(UnityEngine.XR.CommonUsages.triggerButton, out leftTrigger);
 
                     if (leftTrigger)
-                    {
                         currentActions.Add(Actions.CharacterSheet);
-                    }
 
                 }
 
@@ -1907,7 +1803,6 @@ namespace DFUVR
                 //leftHand.TryGetFeatureValue(CommonUsages.gripButton, out lGripButton);
                 //if (lGripButton && !ControllerPatch.flag)
                 //{
-
                 //    //currentActions.Add(Actions.ActivateCenterObject);
                 //    //if (!Var.climbingMotor.IsClimbing)
                 //    //{
@@ -1921,10 +1816,7 @@ namespace DFUVR
                 //    //Plugin.LoggerInstance.LogInfo("climbing");
                 //    //currentActions.Add(Actions.);
                 //    currentActions.Add(Actions.MoveForwards);
-
                 //}
-
-
 
                 if (Var.isNotOculus)
                 {
@@ -1951,30 +1843,16 @@ namespace DFUVR
 
                     if (ControllerPatch.flag)
                     {
-
                         if (acceptButton)
-                        {
                             currentActions.Add(Actions.TravelMap);
-                        }
                         else if (cancelButton)
-                        {
                             currentActions.Add(Actions.LogBook);
-                        }
                         else if (gripButton)
-                        {
                             currentActions.Add(Actions.Rest);
-                        }
                         else if (lGrip)
-                        {
                             currentActions.Add(Actions.Transport);
-                        }
-                        else if (leftTrigger) { 
-                            currentActions.Add(Actions.CharacterSheet); 
-                        }
-
-
-
-
+                        else if (leftTrigger)
+                            currentActions.Add(Actions.CharacterSheet);
                     }
                     else
                     {
@@ -1985,31 +1863,19 @@ namespace DFUVR
                         if (!ControllerPatch.isChanging)
                         {
                             if (cancelButton && !ControllerPatch.flag)
-                            {
                                 currentActions.Add(Actions.Inventory);
-                            }
-                            if (secondaryButton && !ControllerPatch.flag) 
-                            {
+                            if (secondaryButton && !ControllerPatch.flag)
                                 currentActions.Add(Actions.Escape);
-                            }
                             if (primaryButton && !ControllerPatch.flag)
-                            {
                                 currentActions.Add(Actions.Escape);
-                            }
-                            if(rThumbstickClick && !ControllerPatch.flag)
-                            {
+                            if (rThumbstickClick && !ControllerPatch.flag)
                                 currentActions.Add(Actions.CastSpell);
-                            }
                         }
-
                     }
                 }
             }
-
         }
     }
-
-
 
     //fixes UI
     [HarmonyPatch(typeof(UserInterfaceRenderTarget), "CheckTargetTexture")]
@@ -2019,7 +1885,7 @@ namespace DFUVR
         static void Prefix(UserInterfaceRenderTarget __instance)
         {
             #region Fields
-            
+
             int customWidth = (int)AccessTools.Field(typeof(UserInterfaceRenderTarget), "customWidth").GetValue(__instance);
             int customHeight = (int)AccessTools.Field(typeof(UserInterfaceRenderTarget), "customHeight").GetValue(__instance);
             Vector2 targetSize = (Vector2)AccessTools.Field(typeof(UserInterfaceRenderTarget), "targetSize").GetValue(__instance);
@@ -2032,62 +1898,51 @@ namespace DFUVR
             int height = (customHeight == 0) ? Screen.height : customHeight;
             targetSize = new Vector2(width, height);
 
-            
             float scaleX = (float)Screen.width / (float)customWidth;
             float scaleY = (float)Screen.height / (float)customHeight;
             parentPanel.RootSize = targetSize;
             parentPanel.Scale = new Vector2(scaleX, scaleY);
             parentPanel.AutoSize = AutoSizeModes.None;
 
-            
             bool isReady = (bool)AccessTools.Method(typeof(UserInterfaceRenderTarget), "IsReady").Invoke(__instance, null);
-
-            
             if (!isReady || targetTexture.width != width || targetTexture.height != height)
             {
-                
                 RenderTexture rTexture = GameObject.Find("DaggerfallUI").GetComponent<sTx>().sTxx;
 
-                
                 targetTexture = rTexture;
                 targetTexture.filterMode = filterMode;
                 targetTexture.name = string.Format("DaggerfallUI RenderTexture {0}", createCount++);
                 targetTexture.Create();
 
-                
                 AccessTools.Field(typeof(UserInterfaceRenderTarget), "targetTexture").SetValue(__instance, targetTexture);
                 AccessTools.Field(typeof(UserInterfaceRenderTarget), "createCount").SetValue(__instance, createCount);
 
-                
                 //Plugin.LoggerInstance.LogInfo($"Created UI RenderTexture with dimensions {width}, {height}");
 
-                
                 if (__instance.OutputImage)
                     __instance.OutputImage.texture = targetTexture;
 
-                
                 AccessTools.Method(typeof(UserInterfaceRenderTarget), "RaiseOnCreateTargetTexture").Invoke(__instance, null);
             }
         }
     }
+
     //[HarmonyPatch(typeof(Application),nameof(Application.Quit))]
     //public class ResetMonPatch
     //{
     //    [HarmonyPrefix]
     //    static void ResetRes(Application __instance)
     //    {
-
     //    }
     //}
 
     //Initialize the plugin
     [BepInPlugin("com.Lokius.DFUVR", "DFUVR", "0.9.1")]
-    public class Plugin:BaseUnityPlugin
+    public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource LoggerInstance;
         void Awake()
         {
-
             Harmony harmony = new Harmony("com.Lokius.DFUVR");
             harmony.PatchAll();
             LoggerInstance = Logger;
@@ -2106,16 +1961,8 @@ namespace DFUVR
             //Plugin.LoggerInstance.LogInfo("Joysticks:"+joystickNames.Length);
 
             Var.Initialize();
-            
-
 
             //Time.fixedDeltaTime = 1f / 80f;
-
-
-
         }
-        
-
-
     }
 }
