@@ -13,14 +13,11 @@ namespace DFUVR
                 string content = File.ReadAllText(filePath);
                 return content;
             }
-            catch (Exception exception)//if we get an error, it's probably because the file just doesn't exist
+            catch (Exception)//if we get an error, it's probably because the file just doesn't exist
             {
                 Application.Quit();
                 return "Whoopsie, file not found/read error. You done fucked up lmao";
-
-
             }
-
         }
     }
 }

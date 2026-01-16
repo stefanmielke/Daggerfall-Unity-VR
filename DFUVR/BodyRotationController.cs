@@ -17,7 +17,7 @@ namespace DFUVR
         public float rotationSpeed = 2.5f; 
 
         private float lastRotationY = 0f; 
-        private float bodyTargetRotationY = 0f;
+        //private float bodyTargetRotationY = 0f;
         private Quaternion targetRotation;
 
         void Start()
