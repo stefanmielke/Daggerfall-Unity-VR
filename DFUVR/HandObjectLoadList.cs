@@ -66,7 +66,7 @@ namespace DFUVR
                     currentBundlePath = handObjectLoad.assetBundlePath;
                     currentBundle?.Unload(false);
 
-                    string assetBundlePath = Path.Combine(Paths.PluginPath, "AssetBundles/weapons");
+                        string assetBundlePath = Path.Combine(Paths.PluginPath, currentBundlePath);
                     currentBundle = AssetBundle.LoadFromFile(assetBundlePath);
                     if (currentBundle == null)
                     {
