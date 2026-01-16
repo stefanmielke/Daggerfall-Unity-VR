@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Logging;
 using DaggerfallConnect;
 using DaggerfallWorkshop;
@@ -10,11 +7,14 @@ using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Game.MagicAndEffects;
 using DaggerfallWorkshop.Game.UserInterface;
-using HarmonyLib;
-using UnityEngine;
-using static DaggerfallWorkshop.Game.InputManager;
-using UnityEngine.XR;
 using DaggerfallWorkshop.Utility;
+using HarmonyLib;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.XR;
+using static DaggerfallWorkshop.Game.InputManager;
 
 namespace DFUVR
 {
@@ -986,9 +986,8 @@ namespace DFUVR
                 else
                     Var.weaponObject.transform.SetParent(Var.rightHand.transform);
 
-
-                Var.weaponObject.transform.localPosition = currentHandObject.sheatedPositionOffset;
-                Var.weaponObject.transform.localRotation = currentHandObject.sheatedRotationOffset;
+                Var.weaponObject.transform.localPosition = currentHandObject.unsheatedPositionOffset;
+                Var.weaponObject.transform.localRotation = currentHandObject.unsheatedRotationOffset;
                 Var.weaponObject.SetActive(true);
             }
             //this sucks... but it'll do for now
@@ -1000,10 +999,10 @@ namespace DFUVR
 
                     Var.weaponObject.GetComponent<Collider>().enabled = false;
                     Var.weaponObject.transform.SetParent(Var.sheathObject.transform);
-                    
-                    Var.weaponObject.transform.localPosition = currentHandObject.unsheatedPositionOffset;
-                    Var.weaponObject.transform.localRotation = currentHandObject.unsheatedRotationOffset;
-                    Var.sheathObject.GetComponent<MeshRenderer>().enabled = currentHandObject.renderUnsheated;
+
+                    Var.weaponObject.transform.localPosition = currentHandObject.sheatedPositionOffset;
+                    Var.weaponObject.transform.localRotation = currentHandObject.sheatedRotationOffset;
+                    Var.sheathObject.GetComponent<MeshRenderer>().enabled = currentHandObject.renderSheated;
                 }
 
                 Hands.rHand.SetActive(true);
