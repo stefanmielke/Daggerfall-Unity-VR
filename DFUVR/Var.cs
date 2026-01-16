@@ -1,14 +1,12 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.IO;
-using BepInEx;
-using System;
-using UnityEngine.UI;
-using DaggerfallWorkshop.AudioSynthesis.Synthesis;
+﻿using BepInEx;
+using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Linq;
+using System.IO;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace DFUVR
 {
@@ -72,18 +70,10 @@ namespace DFUVR
         public static GameObject VRParent;
         public static GameObject debugSphere;
 
+        public static Dictionary<WeaponTypes, HandObject> handObjects = new Dictionary<WeaponTypes, HandObject>();
         public static GameObject weaponObject;
 
-        public static GameObject sword;
-        public static GameObject dagger;
-        public static GameObject battleaxe;
-        public static GameObject elseA;
         public static GameObject sheathObject;
-        public static GameObject mace;
-        public static GameObject flail;
-        public static GameObject hammer;
-        public static GameObject staff;
-        public static GameObject bow;
         public static GameObject meleeHandR;
 
         public static int connectedJoysticks;
@@ -123,7 +113,9 @@ namespace DFUVR
         public static volatile bool skyboxToggle = true;
 
 
-        private static GameObject LoadGameObject(AssetBundle bundle, string assetName, bool resetPosition = false, bool isActive = false)
+        private static GameObject LoadGameObject<TCollision, TCollider>(AssetBundle bundle, WeaponTypes[] types, string assetName, Vector3 sheatedPosition, Quaternion sheatedRotation, Vector3 unsheatedPosition, Quaternion unsheatedRotation, bool renderUnsheated = false, bool resetPosition = false, bool isActive = false)
+            where TCollision : MonoBehaviour
+            where TCollider : Collider
         {
             var gameObject = Instantiate(bundle.LoadAsset<GameObject>(assetName));
             gameObject.SetActive(isActive);
@@ -134,24 +126,11 @@ namespace DFUVR
                 gameObject.transform.rotation = Quaternion.identity;
             }
 
-            return gameObject;
-        }
-
-        private static GameObject LoadGameObject<TCollider>(AssetBundle bundle, string assetName, bool resetPosition = false, bool isActive = false)
-            where TCollider : Collider
-        {
-            var gameObject = LoadGameObject(bundle, assetName, resetPosition, isActive);
-
-            gameObject.AddComponent<TCollider>().isTrigger = true;
-
-            return gameObject;
-        }
-
-        private static GameObject LoadGameObject<TCollision, TCollider>(AssetBundle bundle, string assetName, bool resetPosition = false, bool isActive = false)
-            where TCollision : MonoBehaviour
-            where TCollider : Collider
-        {
-            var gameObject = LoadGameObject(bundle, assetName, resetPosition, isActive);
+            if (types != null)
+            {
+                foreach (var type in types)
+                    handObjects.Add(type, new HandObject(gameObject, sheatedPosition, sheatedRotation, unsheatedPosition, unsheatedRotation, renderUnsheated));
+            }
 
             gameObject.AddComponent<TCollision>();
             gameObject.GetComponent<TCollider>().isTrigger = true;
@@ -159,43 +138,89 @@ namespace DFUVR
             return gameObject;
         }
 
+        private static void LoadGameObject(AssetBundle bundle, HandObjectLoadList handObjectLoad)
+        {
+            var gameObject = Instantiate(bundle.LoadAsset<GameObject>(handObjectLoad.assetName));
+            if (gameObject == null)
+                Plugin.LoggerInstance.LogError($"Failed to load asset '{handObjectLoad.assetName}' from AssetBundle.");
+
+            gameObject.SetActive(handObjectLoad.isActive);
+
+            if (handObjectLoad.resetPosition)
+            {
+                gameObject.transform.position = Vector3.zero;
+                gameObject.transform.rotation = Quaternion.identity;
+            }
+
+            if (handObjectLoad.weaponTypes != null)
+            {
+                foreach (var type in handObjectLoad.weaponTypes)
+                    handObjects.Add(type, new HandObject(gameObject, handObjectLoad.sheatedPositionOffset, handObjectLoad.sheatedRotationOffset, handObjectLoad.unsheatedPositionOffset, handObjectLoad.unsheatedRotationOffset, handObjectLoad.renderUnsheated));
+            }
+
+            if (handObjectLoad.collisionType != null)
+            {
+                gameObject.AddComponent(handObjectLoad.collisionType);
+                var collider = gameObject.GetComponent(handObjectLoad.colliderType) as Collider;
+                if (collider == null)
+                    Plugin.LoggerInstance.LogError($"Failed to add collider of type '{handObjectLoad.colliderType}' to '{handObjectLoad.assetName}'.");
+
+                collider.isTrigger = true;
+            }
+            else if (handObjectLoad.colliderType != null)
+            {
+                var collider = gameObject.AddComponent(handObjectLoad.colliderType) as Collider;
+                if (collider == null)
+                    Plugin.LoggerInstance.LogError($"Failed to add collider of type '{handObjectLoad.colliderType}' to '{handObjectLoad.assetName}'.");
+
+                collider.isTrigger = true;
+            }
+
+            if (handObjectLoad.postAction != null)
+                handObjectLoad.postAction.Invoke(gameObject);
+        }
+
         //Load weapon and other models from the Asset bundles
         public static void InitModels()
         {
+            Plugin.LoggerInstance.LogInfo($"InitModels starting");
+
             string assetBundlePath = Path.Combine(Paths.PluginPath, "AssetBundles/weapons");
             AssetBundle assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
 
-            sword = LoadGameObject<WeaponCollision, MeshCollider>(assetBundle, "Sword", true, true);
-            dagger = LoadGameObject<WeaponCollision, MeshCollider>(assetBundle, "Steel_Dagger_512");
-            battleaxe = LoadGameObject<WeaponCollision, MeshCollider>(assetBundle, "MM_Axe_01_01_lod2");
-            elseA = LoadGameObject(assetBundle, "Sheath", true);
-            mace = LoadGameObject<WeaponCollision, MeshCollider>(assetBundle, "mace");
-            //flail and mace are the same model for now
-            flail = LoadGameObject<WeaponCollision, MeshCollider>(assetBundle, "mace");
-            hammer = LoadGameObject<WeaponCollision, BoxCollider>(assetBundle, "Warhammer_1");
-            staff = LoadGameObject<WeaponCollision, BoxCollider>(assetBundle, "Staff_1");
+            if (HandObjectLoadList.handObjects == null || HandObjectLoadList.handObjects.Count == 0)
+                Plugin.LoggerInstance.LogError("HandObjectLoadList is null or empty.");
 
-            bow = LoadGameObject<SphereCollider>(assetBundle, "Crossbow");
-            bow.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            Plugin.LoggerInstance.LogInfo($"Loading hand objects");
+
+            foreach (var handObjectLoad in HandObjectLoadList.handObjects)
+            {
+                if (handObjectLoad == null)
+                    Plugin.LoggerInstance.LogError("HandObjectLoadList contains a null entry.");
+
+                Plugin.LoggerInstance.LogInfo($"Loading hand object: {handObjectLoad.ToString()}");
+                LoadGameObject(assetBundle, handObjectLoad);
+            }
 
             assetBundle.Unload(false);
+
             Var.characterController = GameObject.Find("PlayerAdvanced").GetComponent<CharacterController>();
 
             string handBundlePath = Path.Combine(Paths.PluginPath, "AssetBundles/hands");
             AssetBundle handBundle = AssetBundle.LoadFromFile(handBundlePath);
 
-            meleeHandR = LoadGameObject<WeaponCollision, SphereCollider>(handBundle, "rHandClosed");
+            meleeHandR = LoadGameObject<WeaponCollision, SphereCollider>(handBundle, null, "rHandClosed", new Vector3(0, 0, -0.05f), Quaternion.Euler(20, 10, 270), Vector3.zero, Quaternion.identity);
             try
             {
+                var sword = handObjects[WeaponTypes.LongBlade].gameObject;
                 meleeHandR.transform.GetChild(2).GetComponent<SkinnedMeshRenderer>().material = sword.GetComponent<MeshRenderer>().material;
+                sword.SetActive(false);
             }
             catch (Exception e)
             {
                 Plugin.LoggerInstance.LogError(e);
             }
 
-            // TODO: check if this is needed here or can be set before
-            sword.SetActive(false);
             InitKeyboard();
         }
 
