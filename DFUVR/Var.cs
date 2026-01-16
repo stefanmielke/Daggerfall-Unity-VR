@@ -74,7 +74,6 @@ namespace DFUVR
         public static GameObject weaponObject;
 
         public static GameObject sheathObject;
-        public static GameObject meleeHandR;
 
         public static int connectedJoysticks;
 
@@ -112,114 +111,12 @@ namespace DFUVR
 
         public static volatile bool skyboxToggle = true;
 
-
-        private static GameObject LoadGameObject<TCollision, TCollider>(AssetBundle bundle, WeaponTypes[] types, string assetName, Vector3 sheatedPosition, Quaternion sheatedRotation, Vector3 unsheatedPosition, Quaternion unsheatedRotation, bool renderUnsheated = false, bool resetPosition = false, bool isActive = false)
-            where TCollision : MonoBehaviour
-            where TCollider : Collider
-        {
-            var gameObject = Instantiate(bundle.LoadAsset<GameObject>(assetName));
-            gameObject.SetActive(isActive);
-
-            if (resetPosition)
-            {
-                gameObject.transform.position = Vector3.zero;
-                gameObject.transform.rotation = Quaternion.identity;
-            }
-
-            if (types != null)
-            {
-                foreach (var type in types)
-                    handObjects.Add(type, new HandObject(gameObject, sheatedPosition, sheatedRotation, unsheatedPosition, unsheatedRotation, renderUnsheated));
-            }
-
-            gameObject.AddComponent<TCollision>();
-            gameObject.GetComponent<TCollider>().isTrigger = true;
-
-            return gameObject;
-        }
-
-        private static void LoadGameObject(AssetBundle bundle, HandObjectLoadList handObjectLoad)
-        {
-            var gameObject = Instantiate(bundle.LoadAsset<GameObject>(handObjectLoad.assetName));
-            if (gameObject == null)
-                Plugin.LoggerInstance.LogError($"Failed to load asset '{handObjectLoad.assetName}' from AssetBundle.");
-
-            gameObject.SetActive(handObjectLoad.isActive);
-
-            if (handObjectLoad.resetPosition)
-            {
-                gameObject.transform.position = Vector3.zero;
-                gameObject.transform.rotation = Quaternion.identity;
-            }
-
-            if (handObjectLoad.weaponTypes != null)
-            {
-                foreach (var type in handObjectLoad.weaponTypes)
-                    handObjects.Add(type, new HandObject(gameObject, handObjectLoad.sheatedPositionOffset, handObjectLoad.sheatedRotationOffset, handObjectLoad.unsheatedPositionOffset, handObjectLoad.unsheatedRotationOffset, handObjectLoad.renderUnsheated));
-            }
-
-            if (handObjectLoad.collisionType != null)
-            {
-                gameObject.AddComponent(handObjectLoad.collisionType);
-                var collider = gameObject.GetComponent(handObjectLoad.colliderType) as Collider;
-                if (collider == null)
-                    Plugin.LoggerInstance.LogError($"Failed to add collider of type '{handObjectLoad.colliderType}' to '{handObjectLoad.assetName}'.");
-
-                collider.isTrigger = true;
-            }
-            else if (handObjectLoad.colliderType != null)
-            {
-                var collider = gameObject.AddComponent(handObjectLoad.colliderType) as Collider;
-                if (collider == null)
-                    Plugin.LoggerInstance.LogError($"Failed to add collider of type '{handObjectLoad.colliderType}' to '{handObjectLoad.assetName}'.");
-
-                collider.isTrigger = true;
-            }
-
-            if (handObjectLoad.postAction != null)
-                handObjectLoad.postAction.Invoke(gameObject);
-        }
-
         //Load weapon and other models from the Asset bundles
         public static void InitModels()
         {
-            Plugin.LoggerInstance.LogInfo($"InitModels starting");
+            HandObjectLoadList.LoadAllHandObjects(handObjects);
 
-            string assetBundlePath = Path.Combine(Paths.PluginPath, "AssetBundles/weapons");
-            AssetBundle assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
-
-            if (HandObjectLoadList.handObjects == null || HandObjectLoadList.handObjects.Count == 0)
-                Plugin.LoggerInstance.LogError("HandObjectLoadList is null or empty.");
-
-            Plugin.LoggerInstance.LogInfo($"Loading hand objects");
-
-            foreach (var handObjectLoad in HandObjectLoadList.handObjects)
-            {
-                if (handObjectLoad == null)
-                    Plugin.LoggerInstance.LogError("HandObjectLoadList contains a null entry.");
-
-                Plugin.LoggerInstance.LogInfo($"Loading hand object: {handObjectLoad.ToString()}");
-                LoadGameObject(assetBundle, handObjectLoad);
-            }
-
-            assetBundle.Unload(false);
-
-            Var.characterController = GameObject.Find("PlayerAdvanced").GetComponent<CharacterController>();
-
-            string handBundlePath = Path.Combine(Paths.PluginPath, "AssetBundles/hands");
-            AssetBundle handBundle = AssetBundle.LoadFromFile(handBundlePath);
-
-            meleeHandR = LoadGameObject<WeaponCollision, SphereCollider>(handBundle, null, "rHandClosed", new Vector3(0, 0, -0.05f), Quaternion.Euler(20, 10, 270), Vector3.zero, Quaternion.identity);
-            try
-            {
-                var sword = handObjects[WeaponTypes.LongBlade].gameObject;
-                meleeHandR.transform.GetChild(2).GetComponent<SkinnedMeshRenderer>().material = sword.GetComponent<MeshRenderer>().material;
-                sword.SetActive(false);
-            }
-            catch (Exception e)
-            {
-                Plugin.LoggerInstance.LogError(e);
-            }
+            characterController = GameObject.Find("PlayerAdvanced").GetComponent<CharacterController>();
 
             InitKeyboard();
         }
@@ -262,13 +159,11 @@ namespace DFUVR
 
             keyboard.AddComponent<KeyboardController>();
 
-
             //The numbers get placed out of order on the keyboard... why?!?!
             Transform keysParent = keyboard.transform.GetChild(0).GetChild(0);
             int numKeys = 10;
             for (int i = 0; i < numKeys; i++)
             {
-
                 Plugin.LoggerInstance.LogInfo("started Button " + i.ToString());
                 GameObject clonedKey = Instantiate(keysParent.GetChild(i).gameObject);
                 //clonedKey.transform.SetSiblingIndex(i);
@@ -312,7 +207,6 @@ namespace DFUVR
             Debug.Log("Reading Controller Settings");
             string filePath = Path.Combine(Paths.PluginPath, "Settings.txt");
 
-
             try //to read the Settings.txt file
             {
                 string fileContent = FileReader.ReadFromFile(filePath);
@@ -320,7 +214,7 @@ namespace DFUVR
                 Debug.Log(lines[2].Trim());
                 //using only a bool makes the settings file too hard to understand for most people
                 //bool.TryParse(lines[6], out leftHanded);
-                if (lines[6].Trim() == "left") { Var.leftHanded = true; }
+                if (lines[6].Trim() == "left") { leftHanded = true; }
 
                 //Set the bindings to the default Oculus Touch bindings
                 //This is not necessary. The default values are already set up for the Touch Controllers
@@ -328,7 +222,7 @@ namespace DFUVR
                 string headset = lines[2].Trim();
                 if (headset == "Oculus/Meta")
                 {
-                    if (Var.leftHanded)
+                    if (leftHanded)
                         gripButton = KeyCode.JoystickButton4;
                     else
                         gripButton = KeyCode.JoystickButton5;
@@ -384,8 +278,8 @@ namespace DFUVR
                     //lines = fileContent.Split('\n');
                     Debug.Log("Line1:" + lines[0].Trim());
                     Debug.Log("Line2:" + lines[1].Trim());
-                    Var.heightOffset = float.Parse(lines[0].Trim(), CultureInfo.InvariantCulture);
-                    Plugin.LoggerInstance.LogInfo(Var.heightOffset);
+                    heightOffset = float.Parse(lines[0].Trim(), CultureInfo.InvariantCulture);
+                    Plugin.LoggerInstance.LogInfo(heightOffset);
                     targetTimeStep = 1f / float.Parse(lines[1].Trim());
                     Plugin.LoggerInstance.LogInfo(targetTimeStep);
 
@@ -395,23 +289,7 @@ namespace DFUVR
                     Plugin.LoggerInstance.LogError("Made a fucky wucky while reading the file, oopsie! Error: " + e);
                     targetTimeStep = 1f / 90f;
                 }
-                try
-                {
-                    //deprecated. Should remove all occurences of ReadAxis when I have time.
-                    ReadAxis();
-                }
-                catch
-                {
-                    //deprecated. Was used for the old Unity Input system, however I have since switched to the Unity XR input system for the Joysticks/Touchpads
-                    Plugin.LoggerInstance.LogError("Failed to initialize controller axis. Returning to defaults");
-                    lThumbStickHorizontal = "Axis1";
-                    lThumbStickVertical = "Axis2";
-                    triggers = "Axis3";
-                    rThumbStickHorizontal = "Axis4";
-                    rThumbStickVertical = "Axis5";
-                    placeholder = null;
 
-                }
                 Time.fixedDeltaTime = targetTimeStep;
                 Plugin.LoggerInstance.LogInfo(Time.fixedDeltaTime);
 
@@ -422,17 +300,17 @@ namespace DFUVR
                 float y = float.Parse(sheathVector[1], CultureInfo.InvariantCulture);
                 float z = float.Parse(sheathVector[2], CultureInfo.InvariantCulture);
                 Plugin.LoggerInstance.LogInfo(x);
-                Var.sheathOffset = new Vector3(x, y, z);
+                sheathOffset = new Vector3(x, y, z);
                 bool.TryParse(lines[5], out fStartMenu);
                 //bool.TryParse(lines[6],out leftHanded);
-                Plugin.LoggerInstance.LogInfo("Offsett: " + Var.sheathOffset.ToString());
+                Plugin.LoggerInstance.LogInfo("Offsett: " + sheathOffset.ToString());
 
                 if (lines[7].Trim() == "smooth")
-                    Var.smoothTurn = true;
-                Plugin.LoggerInstance.LogInfo("Smooth turn: " + Var.smoothTurn);
+                    smoothTurn = true;
+                Plugin.LoggerInstance.LogInfo("Smooth turn: " + smoothTurn);
 
                 if (lines[7].Trim() == "none")
-                    Var.noTurn = true;
+                    noTurn = true;
             }
             catch (Exception e)
             {
@@ -447,75 +325,11 @@ namespace DFUVR
             string filePath = Path.Combine(Paths.PluginPath, "Settings.txt");
             string[] lines = File.ReadAllLines(filePath);
 
-            lines[0] = string.Format(CultureInfo.InvariantCulture, "{0}", Var.heightOffset);//Var.heightOffset.ToString();
-            lines[3] = string.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", Var.sphereObject.transform.localPosition.x, Var.sphereObject.transform.localPosition.y, Var.sphereObject.transform.localPosition.z);//Var.sphereObject.transform.localPosition.ToString();//Var.sheathOffset.ToString();
+            lines[0] = string.Format(CultureInfo.InvariantCulture, "{0}", heightOffset);//Var.heightOffset.ToString();
+            lines[3] = string.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", sphereObject.transform.localPosition.x, sphereObject.transform.localPosition.y, sphereObject.transform.localPosition.z);//Var.sphereObject.transform.localPosition.ToString();//Var.sheathOffset.ToString();
             lines[4] = connectedJoysticks.ToString();
 
             File.WriteAllLines(filePath, lines);
         }
-
-        //deprecated. Ignore.
-        public static void SaveAxis()
-        {
-            string filePath = Path.Combine(Paths.PluginPath, "Axis.txt");
-            string[] lines = File.ReadAllLines(filePath);
-
-            lines[0] = string.Format(CultureInfo.InvariantCulture, "Joystick{0}Axis1", Var.lThumbStickHorizontal);
-            lines[1] = string.Format(CultureInfo.InvariantCulture, "Joystick{0}Axis2", Var.lThumbStickVertical);
-            lines[2] = string.Format(CultureInfo.InvariantCulture, "Axis{0}", Var.rThumbStickHorizontal);
-            lines[3] = string.Format(CultureInfo.InvariantCulture, "Axis{0}", Var.rThumbStickVertical);
-            lines[4] = string.Format(CultureInfo.InvariantCulture, "Axis{0}", Var.triggers);
-
-            File.WriteAllLines(filePath, lines);
-        }
-
-        //deprecated. Ignore.
-        static void ReadAxis()
-        {
-            //string filePath = Path.Combine(Paths.PluginPath, "Axis.txt");
-            //string[] lines = File.ReadAllLines(filePath);
-
-            //Var.lThumbStickHorizontal = lines[0];
-            //Var.lThumbStickVertical = lines[1];
-            //Var.rThumbStickHorizontal = lines[2];
-            //Var.rThumbStickVertical = lines[3];
-            //Var.triggers = lines[4];
-
-        }
-
-        //Gets all connected Gamepads. Deprecated.
-        static int GetConnectedGamepadsCount()
-        {
-            string[] joystickNames = Input.GetJoystickNames();
-            Plugin.LoggerInstance.LogInfo("joystickNames.Length");
-            int count = 0;
-
-            foreach (string name in joystickNames)
-            {
-                Plugin.LoggerInstance.LogInfo(name);
-                if (!string.IsNullOrEmpty(name))
-                {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-
-        //static void InternalGetJoystick()
-        //{
-        //    connectedJoysticks = GetConnectedGamepadsCount();
-        //    Plugin.LoggerInstance.LogInfo("Connected Joysticks: " + connectedJoysticks.ToString() + " Previous: " + controllerAmount);
-        //    if (connectedJoysticks != controllerAmount)
-        //    {
-        //        Var.fStartMenu = true;
-        //    }
-        //}
-        //public static IEnumerator WaitForInitialization()
-        //{
-        //    yield return new WaitForEndOfFrame(); // Or WaitForSeconds(0.5f) if needed
-        //    string[] joystickNames = Input.GetJoystickNames();
-        //    Debug.Log("Connected gamepads: " + joystickNames.Length);
-        //}
     }
 }
