@@ -134,16 +134,16 @@ namespace DFUVR
 
                     if (collider == null)
                         Plugin.LoggerInstance.LogError($"Failed to add collider of type '{handObjectLoad.colliderType}' to '{handObjectLoad.assetName}'.");
-
-                    collider.isTrigger = true;
+                    else
+                        collider.isTrigger = true;
                 }
                 else if (handObjectLoad.colliderType != null)
                 {
                     var collider = gameObject.AddComponent(handObjectLoad.colliderType) as Collider;
                     if (collider == null)
                         Plugin.LoggerInstance.LogError($"Failed to add collider of type '{handObjectLoad.colliderType}' to '{handObjectLoad.assetName}'.");
-
-                    collider.isTrigger = true;
+                    else
+                        collider.isTrigger = true;
                 }
 
                 gameObject.SetActive(handObjectLoad.isActive);
