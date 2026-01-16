@@ -1,12 +1,5 @@
-﻿
-using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Game.Utility;
-using HarmonyLib;
-using System;
-using System.Reflection;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SpatialTracking;
 using UnityEngine.UI;
 using uWindowCapture;
@@ -25,8 +18,6 @@ namespace DFUVR
         // Window properties
         public int windowPosX;
         public int windowPosY;
-        public int windowWidth;
-        public int windowHeight;
 
         private UwcWindowTexture wTexture;
 
@@ -52,13 +43,6 @@ namespace DFUVR
                     wTexture = GameObject.Find("VRUI").GetComponent<UwcWindowTexture>();
                     wTexture.type = WindowTextureType.Window;
                     wTexture.partialWindowTitle = "Daggerfall";
-                }
-                else
-                {
-                    //wTexture = GameObject.Find("VRUI").GetComponent<UwcWindowTexture>();
-                    windowHeight = Var.windowHeight;
-                    windowWidth = Var.windowWidth;
-
                 }
             }
             lineRenderer = line;
@@ -130,24 +114,6 @@ namespace DFUVR
                         }
                         else
                         {
-                            //RaycastHit hit;
-
-                            //if (Physics.Raycast(lineStart, trackedPoseDriver.transform.forward, out hit, raycastDistance))
-                            //{
-                            //    if (hit.collider.gameObject.name == "VRUI")
-                            //    {
-                            //        if (Input.GetKeyDown(Var.acceptButton))
-                            //        {
-                            //            Plugin.LoggerInstance.LogInfo("Raycast Hit: " + hit.point);
-                            //            SimulateMouseClick(hit.point);
-                            //        }
-                            //    }
-                            //    if (Input.GetKeyDown(Var.acceptButton))
-                            //    {
-                            //        if (hit.collider.gameObject.name != "VRUI")
-                            //        { Plugin.LoggerInstance.LogInfo("Hit " + hit.collider.gameObject.name); }
-                            //    }
-                            //}
                             RaycastHit[] hits = Physics.RaycastAll(lineStart, trackedPoseDriver.transform.forward, raycastDistance);
 
                             foreach (var hit in hits)
@@ -174,15 +140,13 @@ namespace DFUVR
 
                                     screenX = (screenX * aspectRatio) + offsetX;
 
-                                    SimulateMouseClick(new Vector2(screenX, screenY));
+                                    mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)screenX, (uint)screenY, 0, 0);
+                                    mouse_event(MOUSEEVENTF_LEFTUP, (uint)screenX, (uint)screenY, 0, 0);
+                                    SetCursorPos((int)screenX, (int)screenY);
                                     break;
                                 }
 
-                                if (hit.collider.gameObject.GetComponent<Button>() != null)
-                                {
-                                    hit.collider.gameObject.GetComponent<Button>().onClick.Invoke();
-                                }
-
+                                hit.collider.gameObject.GetComponent<Button>()?.onClick.Invoke();
                             }
                         }
                     }
@@ -201,7 +165,6 @@ namespace DFUVR
                             {
                                 Dropdown dropdown = hit.collider.gameObject.GetComponent<Dropdown>();
 
-
                                 dropdown.value = (dropdown.value + 1) % dropdown.options.Count;
                                 dropdown.RefreshShownValue();
                             }
@@ -209,28 +172,6 @@ namespace DFUVR
                     }
                 }
             }
-
-
-        }
-        //void LateUpdate()
-        //{
-        //    string[] joystickNames = Input.GetJoystickNames();
-        //    foreach (string name in joystickNames)
-        //    {
-        //        Plugin.LoggerInstance.LogInfo("Joystick: " + name);
-        //    }
-        //}
-
-
-
-        //deprecated
-        private void SimulateMouseClick(Vector3 hitPoint)
-        {
-            mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)hitPoint.x, (uint)hitPoint.y, 0, 0);
-            mouse_event(MOUSEEVENTF_LEFTUP, (uint)hitPoint.x, (uint)hitPoint.y, 0, 0);
-            SetCursorPos((int)hitPoint.x, (int)hitPoint.y);
-
-            return;
         }
     }
 }

@@ -1,9 +1,7 @@
 ﻿using BepInEx;
-using BepInEx.Logging;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
@@ -11,13 +9,11 @@ using UnityEngine.UI;
 using uWindowCapture;
 using HarmonyLib;
 using System.Reflection;
-using HarmonyLib.Tools;
 using System;
 namespace DFUVR
 {
     public class UI : MonoBehaviour
     {
-
         // Start is called before the first frame update
         void Start()
         {
@@ -29,17 +25,15 @@ namespace DFUVR
         {
 
         }
+
         public static IEnumerator Spawn()
         {
-            
             string assetBundlePath = Path.Combine(Paths.PluginPath, "AssetBundles", "assetbundle0");
-
 
             AssetBundle assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
 
             Mesh mesh = assetBundle.LoadAsset<Mesh>("uWC_Board");
             Material wMat = assetBundle.LoadAsset<Material>("uWC_Unlit");
-
 
             assetBundle.Unload(false);
             GameObject vrui = new GameObject("VRUI");
@@ -101,7 +95,6 @@ namespace DFUVR
                     GameObject vrparent = new GameObject("VRParent");
                     vrparent.transform.parent = GameObject.Find("SmoothFollower").transform;
 
-                    //cameraObject.transform.parent = GameObject.Find("SmoothFollower").transform;
                     cameraObject.transform.parent = vrparent.transform;
 
                     Camera.main.stereoTargetEye = StereoTargetEyeMask.None;
@@ -113,22 +106,13 @@ namespace DFUVR
 
                     int automapLayer = LayerMask.NameToLayer("Automap");
                     Var.VRCamera.cullingMask = ~(1 << automapLayer);
-
                     Var.VRCamera.farClipPlane = Camera.main.farClipPlane;
 
                     vrparent.transform.localPosition = new Vector3(0, (float)Var.heightOffset, 0);
 
-
-                    //GameObject laserPointer = GameObject.Find("LaserPointer");
-                    //laserPointer.transform.parent = vrparent.transform;
-
-                    //vrui.transform.position = Var.VRCamera.transform.position + new Vector3(0, 1.5f, 2f);
-
-                    //vrui.transform.parent = GameObject.Find("SmoothFollower").transform;
                     vrui.transform.parent = vrparent.transform;
-                    vrui.transform.localScale = new Vector3((float)Var.windowWidth / 1000f, (float)Var.windowHeight / 1000f, 1);
+                    vrui.transform.localScale = new Vector3(Screen.width / 1000f, Screen.height / 1000f, 1);
 
-                    //Var.keyboard.
                     Hands.Spawn();
 
                     Var.keyboard.transform.SetParent(vrui.transform);
@@ -136,10 +120,6 @@ namespace DFUVR
                     Var.keyboard.transform.localRotation = Quaternion.Euler(45, 0, 0);
 
                     Var.keyboard.SetActive(true);
-
-
-
-
                 }
             }
             else
@@ -275,18 +255,9 @@ namespace DFUVR
 
             }
 
-
-
-
-
             CreateMenuController();
             if (!Var.fStartMenu)
-            {
                 Var.isFirst = false;
-            }
-
-
-
         }
         public static IEnumerator Calibrate()
         {

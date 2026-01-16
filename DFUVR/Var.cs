@@ -28,8 +28,6 @@ namespace DFUVR
         public static bool charControllerCalibrated = false;
         public static bool isCalibrated = false;
         public static bool uiActive = true;
-        public static int windowHeight = 1080;
-        public static int windowWidth = 1920;
         public static double heightOffset;
         public static Vector3 sheathOffset;
 

@@ -990,7 +990,6 @@ namespace DFUVR
                 Var.weaponObject.transform.localRotation = currentHandObject.unsheatedRotationOffset;
                 Var.weaponObject.SetActive(true);
             }
-            //this sucks... but it'll do for now
             else
             {
                 if (Var.weaponObject != null)
