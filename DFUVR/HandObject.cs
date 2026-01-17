@@ -17,11 +17,11 @@ namespace DFUVR
         {
             this.asset = asset;
             this.gameObject = gameObject;
-            unsheatedPositionOffset = asset.sheatedPositionOffset;
-            unsheatedRotationOffset = asset.sheatedRotationOffset;
-            sheatedPositionOffset = asset.unsheatedPositionOffset;
-            sheatedRotationOffset = asset.unsheatedRotationOffset;
-            renderSheated = asset.renderUnsheated;
+            unsheatedPositionOffset = asset.unsheatedPositionOffset;
+            unsheatedRotationOffset = asset.unsheatedRotationOffset;
+            sheatedPositionOffset = asset.sheatedPositionOffset;
+            sheatedRotationOffset = asset.sheatedRotationOffset;
+            renderSheated = asset.renderSheated;
         }
     }
 }

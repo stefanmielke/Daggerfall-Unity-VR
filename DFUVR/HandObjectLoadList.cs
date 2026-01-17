@@ -21,17 +21,17 @@ namespace DFUVR
 
         public WeaponTypes[] weaponTypes { get; private set; }
         public string assetName { get; private set; }
-        public Vector3 sheatedPositionOffset { get; private set; }
-        public Quaternion sheatedRotationOffset { get; private set; }
         public Vector3 unsheatedPositionOffset { get; private set; }
         public Quaternion unsheatedRotationOffset { get; private set; }
-        public bool renderUnsheated { get; private set; }
+        public Vector3 sheatedPositionOffset { get; private set; }
+        public Quaternion sheatedRotationOffset { get; private set; }
+        public bool renderSheated { get; private set; }
         public bool resetPosition { get; private set; }
         public bool isActive { get; private set; }
         public Type collisionType { get; private set; }
         public Type colliderType { get; private set; }
         public Action<GameObject> postAction { get; private set; }
-        private HandObjectLoadList(uint assetId, Action<GameObject> postAction, Type collisionType, Type colliderType, WeaponTypes[] weaponTypes, string assetName, bool renderUnsheated = false, bool resetPosition = false, bool isActive = false)
+        private HandObjectLoadList(uint assetId, Action<GameObject> postAction, Type collisionType, Type colliderType, WeaponTypes[] weaponTypes, string assetName, bool renderSheated = false, bool resetPosition = false, bool isActive = false)
         {
             this.assetId = assetId;
             this.assetBundlePath = null;
@@ -41,17 +41,17 @@ namespace DFUVR
             this.colliderType = colliderType;
             this.weaponTypes = weaponTypes;
             this.assetName = assetName;
-            this.sheatedPositionOffset = Vector3.zero;
-            this.sheatedRotationOffset = Quaternion.identity;
             this.unsheatedPositionOffset = Vector3.zero;
             this.unsheatedRotationOffset = Quaternion.identity;
-            this.renderUnsheated = renderUnsheated;
+            this.sheatedPositionOffset = Vector3.zero;
+            this.sheatedRotationOffset = Quaternion.identity;
+            this.renderSheated = renderSheated;
             this.resetPosition = resetPosition;
             this.isActive = isActive;
             this.postAction = postAction;
         }
 
-        private HandObjectLoadList(uint assetId, Action<GameObject> postAction, Type collisionType, Type colliderType, WeaponTypes[] weaponTypes, string assetName, Vector3 sheatedPositionOffset, Quaternion sheatedRotationOffset, Vector3 unsheatedPositionOffset, Quaternion unsheatedRotationOffset, bool renderUnsheated = false, bool resetPosition = false, bool isActive = false)
+        private HandObjectLoadList(uint assetId, Action<GameObject> postAction, Type collisionType, Type colliderType, WeaponTypes[] weaponTypes, string assetName, Vector3 unsheatedPositionOffset, Quaternion unsheatedRotationOffset, Vector3 sheatedPositionOffset, Quaternion sheatedRotationOffset, bool renderSheated = false, bool resetPosition = false, bool isActive = false)
         {
             this.assetId = assetId;
             this.assetBundlePath = null;
@@ -61,17 +61,17 @@ namespace DFUVR
             this.colliderType = colliderType;
             this.weaponTypes = weaponTypes;
             this.assetName = assetName;
-            this.sheatedPositionOffset = sheatedPositionOffset;
-            this.sheatedRotationOffset = sheatedRotationOffset;
             this.unsheatedPositionOffset = unsheatedPositionOffset;
             this.unsheatedRotationOffset = unsheatedRotationOffset;
-            this.renderUnsheated = renderUnsheated;
+            this.sheatedPositionOffset = sheatedPositionOffset;
+            this.sheatedRotationOffset = sheatedRotationOffset;
+            this.renderSheated = renderSheated;
             this.resetPosition = resetPosition;
             this.isActive = isActive;
             this.postAction = postAction;
         }
 
-        private HandObjectLoadList(string assetBundlePath, Action<GameObject> postAction, Type collisionType, Type colliderType, WeaponTypes[] weaponTypes, string assetName, Vector3 sheatedPositionOffset, Quaternion sheatedRotationOffset, Vector3 unsheatedPositionOffset, Quaternion unsheatedRotationOffset, bool renderUnsheated = false, bool resetPosition = false, bool isActive = false)
+        private HandObjectLoadList(string assetBundlePath, Action<GameObject> postAction, Type collisionType, Type colliderType, WeaponTypes[] weaponTypes, string assetName, Vector3 unsheatedPositionOffset, Quaternion unsheatedRotationOffset, Vector3 sheatedPositionOffset, Quaternion sheatedRotationOffset, bool renderSheated = false, bool resetPosition = false, bool isActive = false)
         {
             this.assetBundlePath = assetBundlePath;
             this.assetId = 0;
@@ -81,11 +81,11 @@ namespace DFUVR
             this.colliderType = colliderType;
             this.weaponTypes = weaponTypes;
             this.assetName = assetName;
-            this.sheatedPositionOffset = sheatedPositionOffset;
-            this.sheatedRotationOffset = sheatedRotationOffset;
             this.unsheatedPositionOffset = unsheatedPositionOffset;
             this.unsheatedRotationOffset = unsheatedRotationOffset;
-            this.renderUnsheated = renderUnsheated;
+            this.sheatedPositionOffset = sheatedPositionOffset;
+            this.sheatedRotationOffset = sheatedRotationOffset;
+            this.renderSheated = renderSheated;
             this.resetPosition = resetPosition;
             this.isActive = isActive;
             this.postAction = postAction;
@@ -601,7 +601,7 @@ namespace DFUVR
 
         public override string ToString()
         {
-            return $"HandObjectLoadList(weaponTypes={string.Join(",", weaponTypes)}, assetName={assetName}, sheatedPositionOffset={sheatedPositionOffset}, sheatedRotationOffset={sheatedRotationOffset}, unsheatedPositionOffset={unsheatedPositionOffset}, unsheatedRotationOffset={unsheatedRotationOffset}, renderUnsheated={renderUnsheated}, resetPosition={resetPosition}, isActive={isActive}, collisionType={collisionType}, colliderType={colliderType}, postAction={(postAction != null ? postAction.Method.Name : "null")})";
+            return $"HandObjectLoadList(weaponTypes={string.Join(",", weaponTypes)}, assetName={assetName}, sheatedPositionOffset={unsheatedPositionOffset}, sheatedRotationOffset={unsheatedRotationOffset}, unsheatedPositionOffset={sheatedPositionOffset}, unsheatedRotationOffset={sheatedRotationOffset}, renderUnsheated={renderSheated}, resetPosition={resetPosition}, isActive={isActive}, collisionType={collisionType}, colliderType={colliderType}, postAction={(postAction != null ? postAction.Method.Name : "null")})";
         }
     }
 }
