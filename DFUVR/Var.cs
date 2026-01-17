@@ -69,6 +69,7 @@ namespace DFUVR
         public static GameObject debugSphere;
 
         public static Dictionary<WeaponTypes, HandObject> handObjects = new Dictionary<WeaponTypes, HandObject>();
+        public static Dictionary<string, HandObject> handObjectsByName = new Dictionary<string, HandObject>();
         public static GameObject weaponObject;
 
         public static GameObject sheathObject;
@@ -112,7 +113,7 @@ namespace DFUVR
         //Load weapon and other models from the Asset bundles
         public static void InitModels()
         {
-            HandObjectLoadList.LoadAllHandObjects(handObjects);
+            HandObjectLoadList.LoadAllHandObjects(handObjects, handObjectsByName);
 
             characterController = GameObject.Find("PlayerAdvanced").GetComponent<CharacterController>();
 

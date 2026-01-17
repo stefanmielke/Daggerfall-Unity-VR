@@ -105,6 +105,8 @@ namespace DFUVR
             Physics.IgnoreCollision(GameObject.Find("VRUI").GetComponent<Collider>(), arrowCollider);
             foreach (var handObject in Var.handObjects)
                 Physics.IgnoreCollision(handObject.Value.gameObject.GetComponent<Collider>(), arrowCollider);
+            foreach (var handObject in Var.handObjectsByName)
+                Physics.IgnoreCollision(handObject.Value.gameObject.GetComponent<Collider>(), arrowCollider);
 
             //Plugin.LoggerInstance.LogInfo("Bowed");
             //Var.debugSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -636,7 +638,16 @@ namespace DFUVR
             vrparent.transform.localPosition = new Vector3(vrparent.transform.localPosition.x, (float)Var.heightOffset, vrparent.transform.localPosition.z);
 
             #region Bindings
-            if (!Var.isNotOculus)
+            if (Var.isNotOculus)
+            {
+                InputManager.Instance.SetBinding(KeyCode.Quote, Actions.Run, true);
+                //InputManager.Instance.SetBinding(KeyCode.UpArrow, InputManager.Actions.ToggleConsole, true);
+                InputManager.Instance.SetBinding(KeyCode.Quote, InputManager.Actions.ActivateCenterObject, true);
+                InputManager.Instance.SetBinding(KeyCode.BackQuote, InputManager.Actions.Inventory, true);
+                //InputManager.Instance.SetBinding(Var.gripButton, InputManager.Actions.RecastSpell, true);
+                InputManager.Instance.SetBinding(KeyCode.DoubleQuote, InputManager.Actions.CastSpell, true);
+            }
+            else
             {
                 InputManager.Instance.SetBinding(Var.lStickButton, Actions.Run, true);
                 //InputManager.Instance.SetBinding(Var.acceptButton, Actions.AutoRun, true);
@@ -647,19 +658,11 @@ namespace DFUVR
                 InputManager.Instance.SetBinding(Var.acceptButton, InputManager.Actions.RecastSpell, true);
                 InputManager.Instance.SetBinding(Var.rStickButton, InputManager.Actions.CastSpell, true);
             }
-            else
-            {
-                InputManager.Instance.SetBinding(KeyCode.Quote, Actions.Run, true);
-                //InputManager.Instance.SetBinding(KeyCode.UpArrow, InputManager.Actions.ToggleConsole, true);
-                InputManager.Instance.SetBinding(KeyCode.Quote, InputManager.Actions.ActivateCenterObject, true);
-                InputManager.Instance.SetBinding(KeyCode.BackQuote, InputManager.Actions.Inventory, true);
-                //InputManager.Instance.SetBinding(Var.gripButton, InputManager.Actions.RecastSpell, true);
-                InputManager.Instance.SetBinding(KeyCode.DoubleQuote, InputManager.Actions.CastSpell, true);
-
-            }
             #endregion
 
             foreach (var handObject in Var.handObjects)
+                handObject.Value.gameObject.SetActive(true);
+            foreach (var handObject in Var.handObjectsByName)
                 handObject.Value.gameObject.SetActive(true);
         }
     }
@@ -928,7 +931,7 @@ namespace DFUVR
                             missile.IsArrow = true;
                             missile.IsArrowSummoned = isArrowSummoned;
                             //Plugin.LoggerInstance.LogInfo("Bow almost used");
-                            lastBowUsed = usingRightHand ? currentRightHandWeapon : currentLeftHandWeapon; ;
+                            lastBowUsed = usingRightHand ? currentRightHandWeapon : currentLeftHandWeapon;
                             //Plugin.LoggerInstance.LogInfo("Bow used");
                         }
                     }
@@ -974,7 +977,11 @@ namespace DFUVR
                 Hands.rHand.SetActive(false);
                 Hands.lHand.SetActive(false);
 
-                var currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
+                HandObject currentHandObject = null;
+                if (Var.handObjectsByName.ContainsKey(__instance.ScreenWeapon.SpecificWeapon.LongName))
+                    currentHandObject = Var.handObjectsByName[__instance.ScreenWeapon.SpecificWeapon.LongName];
+                else
+                    currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
 
                 GameObject tempObject = currentHandObject.gameObject;
 
@@ -994,7 +1001,11 @@ namespace DFUVR
             {
                 if (Var.weaponObject != null)
                 {
-                    var currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
+                    HandObject currentHandObject = null;
+                    if (Var.handObjectsByName.ContainsKey(__instance.ScreenWeapon.SpecificWeapon.LongName))
+                        currentHandObject = Var.handObjectsByName[__instance.ScreenWeapon.SpecificWeapon.LongName];
+                    else
+                        currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
 
                     Var.weaponObject.GetComponent<Collider>().enabled = false;
                     Var.weaponObject.transform.SetParent(Var.sheathObject.transform);
