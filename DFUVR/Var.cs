@@ -71,6 +71,7 @@ namespace DFUVR
         public static Dictionary<WeaponTypes, HandObject> handObjects = new Dictionary<WeaponTypes, HandObject>();
         public static Dictionary<string, HandObject> handObjectsByName = new Dictionary<string, HandObject>();
         public static GameObject weaponObject;
+        public static string currentWeaponName;
 
         public static GameObject sheathObject;
 

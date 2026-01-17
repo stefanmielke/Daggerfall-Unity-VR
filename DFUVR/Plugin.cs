@@ -968,7 +968,7 @@ namespace DFUVR
     public class CorrectWeaponPatch : MonoBehaviour
     {
         [HarmonyPrefix]
-        static void Prefix(WeaponManager __instance)
+        internal static void Prefix(WeaponManager __instance)
         {
             if (__instance.Sheathed)
             {
@@ -976,6 +976,14 @@ namespace DFUVR
                 Destroy(Var.weaponObject);
                 Hands.rHand.SetActive(false);
                 Hands.lHand.SetActive(false);
+
+                if (__instance.ScreenWeapon == null || __instance.ScreenWeapon.SpecificWeapon == null)
+                {
+                    Var.currentWeaponName = null;
+                    return;
+                }
+
+                Var.currentWeaponName = __instance.ScreenWeapon.SpecificWeapon.LongName;
 
                 HandObject currentHandObject = null;
                 if (Var.handObjectsByName.ContainsKey(__instance.ScreenWeapon.SpecificWeapon.LongName))
@@ -1002,22 +1010,44 @@ namespace DFUVR
                 if (Var.weaponObject != null)
                 {
                     HandObject currentHandObject = null;
-                    if (Var.handObjectsByName.ContainsKey(__instance.ScreenWeapon.SpecificWeapon.LongName))
-                        currentHandObject = Var.handObjectsByName[__instance.ScreenWeapon.SpecificWeapon.LongName];
+                    if (__instance.ScreenWeapon == null || __instance.ScreenWeapon.SpecificWeapon == null)
+                    {
+                        Var.currentWeaponName = null;
+                    }
                     else
-                        currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
+                    {
+                        Var.currentWeaponName = __instance.ScreenWeapon.SpecificWeapon.LongName;
 
-                    Var.weaponObject.GetComponent<Collider>().enabled = false;
-                    Var.weaponObject.transform.SetParent(Var.sheathObject.transform);
+                        if (Var.handObjectsByName.ContainsKey(__instance.ScreenWeapon.SpecificWeapon.LongName))
+                            currentHandObject = Var.handObjectsByName[__instance.ScreenWeapon.SpecificWeapon.LongName];
+                        else
+                            currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
 
-                    Var.weaponObject.transform.localPosition = currentHandObject.sheatedPositionOffset;
-                    Var.weaponObject.transform.localRotation = currentHandObject.sheatedRotationOffset;
-                    Var.sheathObject.GetComponent<MeshRenderer>().enabled = currentHandObject.renderSheated;
+                        Var.weaponObject.GetComponent<Collider>().enabled = false;
+                        Var.weaponObject.transform.SetParent(Var.sheathObject.transform);
+
+                        Var.weaponObject.transform.localPosition = currentHandObject.sheatedPositionOffset;
+                        Var.weaponObject.transform.localRotation = currentHandObject.sheatedRotationOffset;
+                        Var.sheathObject.GetComponent<MeshRenderer>().enabled = currentHandObject.renderSheated;
+                    }
                 }
 
                 Hands.rHand.SetActive(true);
                 Hands.lHand.SetActive(true);
             }
+        }
+    }
+
+
+    [HarmonyPatch(typeof(WeaponManager), "ApplyWeapon")]
+    public class ApplyWeaponPatch : MonoBehaviour
+    {
+        [HarmonyPostfix]
+        static void Postfix(WeaponManager __instance)
+        {
+            if (__instance.ScreenWeapon == null || __instance.ScreenWeapon.SpecificWeapon == null ||
+                __instance.ScreenWeapon.SpecificWeapon.LongName != Var.currentWeaponName)
+                CorrectWeaponPatch.Prefix(__instance);
         }
     }
 

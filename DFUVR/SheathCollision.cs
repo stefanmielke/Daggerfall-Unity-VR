@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using DaggerfallWorkshop;
+﻿using UnityEngine;
 namespace DFUVR
 {
-    public class SheathCollision:MonoBehaviour
+    public class SheathCollision : MonoBehaviour
     {
-        public static bool flag=false;
-        public static bool rightHand=true;
+        public static bool canUse = false;
+        public static bool rightHand = true;
+
         void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.GetComponent<HandLabel>() != null) 
-            { 
-                
+            if (other.gameObject.GetComponent<HandLabel>() != null)
+            {
                 if (other.gameObject.GetComponent<HandLabel>().rightHand == false)
                 {
                     Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.LeftHand, 0.6f);
@@ -23,25 +17,17 @@ namespace DFUVR
                 else
                 {
                     Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.RightHand, 0.6f);
-                    flag = true;
-
+                    canUse = true;
                 }
-
-                //Plugin.LoggerInstance.LogInfo("Entered Collider");
-
             }
-
-
         }
-        void OnTriggerExit(Collider other) 
+
+        void OnTriggerExit(Collider other)
         {
             if (other.gameObject.GetComponent<HandLabel>() != null)
             {
-                flag = false;
-                //Plugin.LoggerInstance.LogInfo("Exited Collider");
-
+                canUse = false;
             }
-
         }
     }
 }

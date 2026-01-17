@@ -11,8 +11,10 @@ namespace DFUVR
         public static GameObject sphere;
         public static SphereCollider sphereCollider;
         public static GameObject sheathOB;
-        private static bool gripFlag = false;
+
+        private static bool wantsToUseSheath = false;
         private static bool alreadyGripped = false;
+
         void Start()
         {
             sphere = new GameObject("Sphere");
@@ -68,15 +70,15 @@ namespace DFUVR
 
                 if (gripButton)
                 {
-                    gripFlag = true;
+                    wantsToUseSheath = true;
                 }
                 else
                 {
-                    gripFlag = false;
+                    wantsToUseSheath = false;
                     alreadyGripped = false;
                 }
 
-                if ((gripFlag && SheathCollision.flag) && !alreadyGripped)
+                if ((wantsToUseSheath && SheathCollision.canUse) && !alreadyGripped)
                 {
                     alreadyGripped = true;
                     GameObject.Find("PlayerAdvanced").GetComponent<WeaponManager>().ToggleSheath();
@@ -85,15 +87,15 @@ namespace DFUVR
 
             if (Input.GetKeyDown(Var.gripButton))
             {
-                gripFlag = true;
+                wantsToUseSheath = true;
             }
             else if (Input.GetKeyUp(Var.gripButton))
             {
-                gripFlag = false;
+                wantsToUseSheath = false;
                 alreadyGripped = false;
             }
 
-            if ((gripFlag && SheathCollision.flag) && !alreadyGripped)
+            if (wantsToUseSheath && SheathCollision.canUse && !alreadyGripped)
             {
                 alreadyGripped = true;
                 GameObject.Find("PlayerAdvanced").GetComponent<WeaponManager>().ToggleSheath();

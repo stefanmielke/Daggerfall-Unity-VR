@@ -122,10 +122,8 @@ namespace DFUVR
 
                         foreach (var hit in hits)
                         {
-                            Plugin.LoggerInstance.LogInfo("clicked");
                             if (hit.collider.gameObject.name == "VRUI")
                             {
-                                Plugin.LoggerInstance.LogInfo("Raycast Hit: " + hit.point);
                                 SimulateMouseClick(hit.point);
                                 break;
                             }
@@ -161,30 +159,40 @@ namespace DFUVR
         {
             GameObject vrui = GameObject.Find("VRUI");
             Vector3 localHitPoint = vrui.transform.InverseTransformPoint(hitPoint);
-            Plugin.LoggerInstance.LogInfo($"Local Hit Point: {localHitPoint}");
-            Plugin.LoggerInstance.LogInfo("Width: " + Screen.width);
-            Plugin.LoggerInstance.LogInfo("Height: " + Screen.height);
             double asp = (double)Screen.width / Screen.height;
-            Plugin.LoggerInstance.LogInfo("Aspect ratio: " + asp);
 
             double normalizedX = (localHitPoint.x * asp + (vrui.transform.localScale.x * 0.5f)) / vrui.transform.localScale.x;//(1.77f)
             double normalizedY = (localHitPoint.y + (vrui.transform.localScale.y * 0.5f)) / vrui.transform.localScale.y;
             //double normalizedX = (localHitPoint.x * 1.60f + (vrui.transform.localScale.x * 0.5f)) / vrui.transform.localScale.x;//(1.77f)
             //double normalizedY = (localHitPoint.y *0.9f + (vrui.transform.localScale.y * 0.5f)) / vrui.transform.localScale.y;
-            Plugin.LoggerInstance.LogInfo($"Normalized Hit Point: ({normalizedX}, {normalizedY})");
 
 
             int screenX = (int)(normalizedX * Screen.width); //+ windowPosX;
             int screenY = (int)((1 - normalizedY) * Screen.height);// + windowPosY; 
-            Plugin.LoggerInstance.LogInfo($"Screen Coordinates: ({screenX}, {screenY})");
 
             if (!isClicking && (Input.GetKeyDown(Var.acceptButton) || TriggerProvider.pressedDone))
             {
+                Plugin.LoggerInstance.LogInfo("Clicked");
+                Plugin.LoggerInstance.LogInfo($"Local Hit Point: {localHitPoint}");
+                Plugin.LoggerInstance.LogInfo("Width: " + Screen.width);
+                Plugin.LoggerInstance.LogInfo("Height: " + Screen.height);
+                Plugin.LoggerInstance.LogInfo("Aspect ratio: " + asp);
+                Plugin.LoggerInstance.LogInfo($"Normalized Hit Point: ({normalizedX}, {normalizedY})");
+                Plugin.LoggerInstance.LogInfo($"Screen Coordinates: ({screenX}, {screenY})");
+
                 mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)screenX, (uint)screenY, 0, 0);
                 isClicking = true;
             }
             else if (isClicking && (!Input.GetKeyDown(Var.acceptButton) && !TriggerProvider.pressedDone))
             {
+                Plugin.LoggerInstance.LogInfo("Unclicked");
+                Plugin.LoggerInstance.LogInfo($"Local Hit Point: {localHitPoint}");
+                Plugin.LoggerInstance.LogInfo("Width: " + Screen.width);
+                Plugin.LoggerInstance.LogInfo("Height: " + Screen.height);
+                Plugin.LoggerInstance.LogInfo("Aspect ratio: " + asp);
+                Plugin.LoggerInstance.LogInfo($"Normalized Hit Point: ({normalizedX}, {normalizedY})");
+                Plugin.LoggerInstance.LogInfo($"Screen Coordinates: ({screenX}, {screenY})");
+
                 isClicking = false;
                 mouse_event(MOUSEEVENTF_LEFTUP, (uint)screenX, (uint)screenY, 0, 0);
             }
