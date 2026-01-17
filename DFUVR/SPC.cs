@@ -108,12 +108,9 @@ namespace DFUVR
                                 //windowCoord = result.windowCoord;
                                 Vector2 desktopCoord = result.desktopCoord;
 
+                                mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
+                                mouse_event(MOUSEEVENTF_LEFTUP, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
                                 SetCursorPos((int)desktopCoord.x, (int)desktopCoord.y);
-                                if (Input.GetKeyDown(Var.acceptButton) || Var.rTriggerDone || Var.lTriggerDone)
-                                {
-                                    mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
-                                    mouse_event(MOUSEEVENTF_LEFTUP, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
-                                }
                             }
                         }
                         else
