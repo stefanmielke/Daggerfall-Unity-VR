@@ -19,6 +19,8 @@ namespace DFUVR
         public int windowPosX;
         public int windowPosY;
 
+        private bool isClicking = false;
+
         private UwcWindowTexture wTexture;
 
         [DllImport("user32.dll")]
@@ -95,39 +97,22 @@ namespace DFUVR
 
                 lineRenderer.SetPosition(0, lineStart);
                 lineRenderer.SetPosition(1, lineEnd);
-                if (Input.GetKeyDown(Var.acceptButton) || Var.rTriggerDone || Var.lTriggerDone)
+                if (!Var.fStartMenu)
                 {
-                    if (!Var.fStartMenu)
+                    if (!Var.isCalibrated)
                     {
-                        if (!Var.isCalibrated)
+                        var result = UwcWindowTexture.RayCast(lineStart, trackedPoseDriver.transform.forward, raycastDistance, -1);
+                        if (result.hit)
                         {
-                            var result = UwcWindowTexture.RayCast(lineStart, trackedPoseDriver.transform.forward, raycastDistance, -1);
-                            if (result.hit)
-                            {
-                                //uWindowCapture really needs a proper documentation. I wish I knew sooner that it had a precise raycast function built in before making one myself...
-                                //windowCoord = result.windowCoord;
-                                Vector2 desktopCoord = result.desktopCoord;
+                            //uWindowCapture really needs a proper documentation. I wish I knew sooner that it had a precise raycast function built in before making one myself...
+                            //windowCoord = result.windowCoord;
+                            Vector2 desktopCoord = result.desktopCoord;
 
+                            SetCursorPos((int)desktopCoord.x, (int)desktopCoord.y);
+                            if (Input.GetKeyDown(Var.acceptButton) || Var.rTriggerDone || Var.lTriggerDone)
+                            {
                                 mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
                                 mouse_event(MOUSEEVENTF_LEFTUP, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
-                                SetCursorPos((int)desktopCoord.x, (int)desktopCoord.y);
-                            }
-                        }
-                        else
-                        {
-                            RaycastHit[] hits = Physics.RaycastAll(lineStart, trackedPoseDriver.transform.forward, raycastDistance);
-
-                            foreach (var hit in hits)
-                            {
-                                Plugin.LoggerInstance.LogInfo("clicked");
-                                if (hit.collider.gameObject.name == "VRUI")
-                                {
-                                    Plugin.LoggerInstance.LogInfo("Raycast Hit: " + hit.point);
-                                    SimulateMouseClick(hit.point);
-                                    break;
-                                }
-
-                                hit.collider.gameObject.GetComponent<Button>()?.onClick.Invoke();
                             }
                         }
                     }
@@ -137,26 +122,43 @@ namespace DFUVR
 
                         foreach (var hit in hits)
                         {
-                            if (hit.collider.gameObject.GetComponent<Button>() != null)
+                            Plugin.LoggerInstance.LogInfo("clicked");
+                            if (hit.collider.gameObject.name == "VRUI")
                             {
-                                hit.collider.gameObject.GetComponent<Button>().onClick.Invoke();
+                                Plugin.LoggerInstance.LogInfo("Raycast Hit: " + hit.point);
+                                SimulateMouseClick(hit.point);
+                                break;
                             }
-                            else if (hit.collider.gameObject.GetComponent<Dropdown>() != null)
-                            {
-                                Dropdown dropdown = hit.collider.gameObject.GetComponent<Dropdown>();
 
-                                dropdown.value = (dropdown.value + 1) % dropdown.options.Count;
-                                dropdown.RefreshShownValue();
-                            }
+                            if (Input.GetKeyDown(Var.acceptButton) || Var.rTriggerDone || Var.lTriggerDone)
+                                hit.collider.gameObject.GetComponent<Button>()?.onClick.Invoke();
+                        }
+                    }
+                }
+                else
+                {
+                    RaycastHit[] hits = Physics.RaycastAll(lineStart, trackedPoseDriver.transform.forward, raycastDistance);
+
+                    foreach (var hit in hits)
+                    {
+                        if (hit.collider.gameObject.GetComponent<Button>() != null)
+                        {
+                            hit.collider.gameObject.GetComponent<Button>().onClick.Invoke();
+                        }
+                        else if (hit.collider.gameObject.GetComponent<Dropdown>() != null)
+                        {
+                            Dropdown dropdown = hit.collider.gameObject.GetComponent<Dropdown>();
+
+                            dropdown.value = (dropdown.value + 1) % dropdown.options.Count;
+                            dropdown.RefreshShownValue();
                         }
                     }
                 }
             }
         }
+
         private void SimulateMouseClick(Vector3 hitPoint)
         {
-
-
             GameObject vrui = GameObject.Find("VRUI");
             Vector3 localHitPoint = vrui.transform.InverseTransformPoint(hitPoint);
             Plugin.LoggerInstance.LogInfo($"Local Hit Point: {localHitPoint}");
@@ -176,9 +178,17 @@ namespace DFUVR
             int screenY = (int)((1 - normalizedY) * Screen.height);// + windowPosY; 
             Plugin.LoggerInstance.LogInfo($"Screen Coordinates: ({screenX}, {screenY})");
 
+            if (!isClicking && (Input.GetKeyDown(Var.acceptButton) || TriggerProvider.pressedDone))
+            {
+                mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)screenX, (uint)screenY, 0, 0);
+                isClicking = true;
+            }
+            else if (isClicking && (!Input.GetKeyDown(Var.acceptButton) && !TriggerProvider.pressedDone))
+            {
+                isClicking = false;
+                mouse_event(MOUSEEVENTF_LEFTUP, (uint)screenX, (uint)screenY, 0, 0);
+            }
 
-            mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)screenX, (uint)screenY, 0, 0);
-            mouse_event(MOUSEEVENTF_LEFTUP, (uint)screenX, (uint)screenY, 0, 0);
             SetCursorPos((int)screenX, (int)screenY);
             //Plugin.LoggerInstance.LogInfo($"Simulated mouse click at ({screenX}, {screenY})");
         }
