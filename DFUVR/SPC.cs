@@ -107,9 +107,13 @@ namespace DFUVR
                                 //uWindowCapture really needs a proper documentation. I wish I knew sooner that it had a precise raycast function built in before making one myself...
                                 //windowCoord = result.windowCoord;
                                 Vector2 desktopCoord = result.desktopCoord;
+
                                 SetCursorPos((int)desktopCoord.x, (int)desktopCoord.y);
-                                mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
-                                mouse_event(MOUSEEVENTF_LEFTUP, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
+                                if (Input.GetKeyDown(Var.acceptButton) || Var.rTriggerDone || Var.lTriggerDone)
+                                {
+                                    mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
+                                    mouse_event(MOUSEEVENTF_LEFTUP, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
+                                }
                             }
                         }
                         else
@@ -121,28 +125,8 @@ namespace DFUVR
                                 Plugin.LoggerInstance.LogInfo("clicked");
                                 if (hit.collider.gameObject.name == "VRUI")
                                 {
-                                    Vector3 localPoint = hit.collider.gameObject.transform.InverseTransformPoint(hit.point);
-                                    MeshFilter mFilter = hit.collider.gameObject.GetComponent<MeshFilter>();
-
-                                    var bounds = mFilter.mesh.bounds;
-
-                                    float u = Mathf.InverseLerp(bounds.min.x, bounds.max.x, localPoint.x);
-                                    float v = Mathf.InverseLerp(bounds.min.y, bounds.max.y, localPoint.y);
-
-                                    float screenX = u * Display.main.systemWidth;
-                                    float screenY = Display.main.systemHeight - (v * Display.main.systemHeight);
-
-                                    float windowAspect = (float)Screen.width / (float)Screen.height;
-                                    float displayAspect = (float)Display.main.systemWidth / (float)Display.main.systemHeight;
-                                    float aspectRatio = windowAspect / displayAspect;
-
-                                    float offsetX = (Display.main.systemWidth - (Display.main.systemWidth * aspectRatio)) / 2;
-
-                                    screenX = (screenX * aspectRatio) + offsetX;
-
-                                    mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)screenX, (uint)screenY, 0, 0);
-                                    mouse_event(MOUSEEVENTF_LEFTUP, (uint)screenX, (uint)screenY, 0, 0);
-                                    SetCursorPos((int)screenX, (int)screenY);
+                                    Plugin.LoggerInstance.LogInfo("Raycast Hit: " + hit.point);
+                                    SimulateMouseClick(hit.point);
                                     break;
                                 }
 
@@ -156,7 +140,6 @@ namespace DFUVR
 
                         foreach (var hit in hits)
                         {
-                            Plugin.LoggerInstance.LogInfo("clicked");
                             if (hit.collider.gameObject.GetComponent<Button>() != null)
                             {
                                 hit.collider.gameObject.GetComponent<Button>().onClick.Invoke();
@@ -172,6 +155,35 @@ namespace DFUVR
                     }
                 }
             }
+        }
+        private void SimulateMouseClick(Vector3 hitPoint)
+        {
+
+
+            GameObject vrui = GameObject.Find("VRUI");
+            Vector3 localHitPoint = vrui.transform.InverseTransformPoint(hitPoint);
+            Plugin.LoggerInstance.LogInfo($"Local Hit Point: {localHitPoint}");
+            Plugin.LoggerInstance.LogInfo("Width: " + Screen.width);
+            Plugin.LoggerInstance.LogInfo("Height: " + Screen.height);
+            double asp = (double)Screen.width / Screen.height;
+            Plugin.LoggerInstance.LogInfo("Aspect ratio: " + asp);
+
+            double normalizedX = (localHitPoint.x * asp + (vrui.transform.localScale.x * 0.5f)) / vrui.transform.localScale.x;//(1.77f)
+            double normalizedY = (localHitPoint.y + (vrui.transform.localScale.y * 0.5f)) / vrui.transform.localScale.y;
+            //double normalizedX = (localHitPoint.x * 1.60f + (vrui.transform.localScale.x * 0.5f)) / vrui.transform.localScale.x;//(1.77f)
+            //double normalizedY = (localHitPoint.y *0.9f + (vrui.transform.localScale.y * 0.5f)) / vrui.transform.localScale.y;
+            Plugin.LoggerInstance.LogInfo($"Normalized Hit Point: ({normalizedX}, {normalizedY})");
+
+
+            int screenX = (int)(normalizedX * Screen.width); //+ windowPosX;
+            int screenY = (int)((1 - normalizedY) * Screen.height);// + windowPosY; 
+            Plugin.LoggerInstance.LogInfo($"Screen Coordinates: ({screenX}, {screenY})");
+
+
+            mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)screenX, (uint)screenY, 0, 0);
+            mouse_event(MOUSEEVENTF_LEFTUP, (uint)screenX, (uint)screenY, 0, 0);
+            SetCursorPos((int)screenX, (int)screenY);
+            //Plugin.LoggerInstance.LogInfo($"Simulated mouse click at ({screenX}, {screenY})");
         }
     }
 }
