@@ -2,14 +2,14 @@
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
-using DFUVR;
 using HarmonyLib;
 using DaggerfallWorkshop.Game.Items;
-using DaggerfallWorkshop.Game.Questing;
 namespace DFUVR
 {
     public class WeaponCollision : MonoBehaviour
     {
+        public static float minTimeToDamageAgain = 0.3f;
+        public static float timeToNextDamage = 0.0f;
         //public float velocityThreshold = 2.0f;
 
         //private Rigidbody rb;
@@ -31,7 +31,10 @@ namespace DFUVR
 
         private void OnTriggerEnter(Collider other)
         {
+            if (timeToNextDamage > Time.time)
+                return;
 
+            timeToNextDamage = Time.time + minTimeToDamageAgain;
 
             //Plugin.LoggerInstance.LogInfo("Hit something");
 
