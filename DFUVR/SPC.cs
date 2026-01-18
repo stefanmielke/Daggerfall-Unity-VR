@@ -108,9 +108,9 @@ namespace DFUVR
                             //windowCoord = result.windowCoord;
                             Vector2 desktopCoord = result.desktopCoord;
 
-                            SetCursorPos((int)desktopCoord.x, (int)desktopCoord.y);
                             if (Input.GetKeyDown(Var.acceptButton) || Var.rTriggerDone || Var.lTriggerDone)
                             {
+                                SetCursorPos((int)desktopCoord.x, (int)desktopCoord.y);
                                 mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
                                 mouse_event(MOUSEEVENTF_LEFTUP, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
                             }
@@ -133,7 +133,7 @@ namespace DFUVR
                         }
                     }
                 }
-                else
+                else if (Input.GetKeyDown(Var.acceptButton) || Var.rTriggerDone || Var.lTriggerDone)
                 {
                     RaycastHit[] hits = Physics.RaycastAll(lineStart, trackedPoseDriver.transform.forward, raycastDistance);
 
