@@ -970,6 +970,7 @@ namespace DFUVR
         [HarmonyPrefix]
         internal static void Prefix(WeaponManager __instance)
         {
+            // if it is unsheathing
             if (__instance.Sheathed)
             {
                 Var.sheathObject.GetComponent<MeshRenderer>().enabled = true;
@@ -977,17 +978,17 @@ namespace DFUVR
                 Hands.rHand.SetActive(false);
                 Hands.lHand.SetActive(false);
 
-                if (__instance.ScreenWeapon == null || __instance.ScreenWeapon.SpecificWeapon == null)
+                if (__instance.ScreenWeapon == null)
                 {
                     Var.currentWeaponName = null;
                     return;
                 }
 
-                Var.currentWeaponName = __instance.ScreenWeapon.SpecificWeapon.LongName;
+                Var.currentWeaponName = __instance.ScreenWeapon.SpecificWeapon?.LongName ?? "";
 
                 HandObject currentHandObject = null;
-                if (Var.handObjectsByName.ContainsKey(__instance.ScreenWeapon.SpecificWeapon.LongName))
-                    currentHandObject = Var.handObjectsByName[__instance.ScreenWeapon.SpecificWeapon.LongName];
+                if (Var.handObjectsByName.ContainsKey(Var.currentWeaponName))
+                    currentHandObject = Var.handObjectsByName[Var.currentWeaponName];
                 else
                     currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
 
@@ -1010,16 +1011,16 @@ namespace DFUVR
                 if (Var.weaponObject != null)
                 {
                     HandObject currentHandObject = null;
-                    if (__instance.ScreenWeapon == null || __instance.ScreenWeapon.SpecificWeapon == null)
+                    if (__instance.ScreenWeapon == null)
                     {
                         Var.currentWeaponName = null;
                     }
                     else
                     {
-                        Var.currentWeaponName = __instance.ScreenWeapon.SpecificWeapon.LongName;
+                        Var.currentWeaponName = __instance.ScreenWeapon.SpecificWeapon?.LongName ?? "";
 
-                        if (Var.handObjectsByName.ContainsKey(__instance.ScreenWeapon.SpecificWeapon.LongName))
-                            currentHandObject = Var.handObjectsByName[__instance.ScreenWeapon.SpecificWeapon.LongName];
+                        if (Var.handObjectsByName.ContainsKey(Var.currentWeaponName))
+                            currentHandObject = Var.handObjectsByName[Var.currentWeaponName];
                         else
                             currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
 
@@ -1045,9 +1046,7 @@ namespace DFUVR
         [HarmonyPostfix]
         static void Postfix(WeaponManager __instance)
         {
-            if (__instance.ScreenWeapon == null || __instance.ScreenWeapon.SpecificWeapon == null ||
-                __instance.ScreenWeapon.SpecificWeapon.LongName != Var.currentWeaponName)
-                CorrectWeaponPatch.Prefix(__instance);
+            CorrectWeaponPatch.Prefix(__instance);
         }
     }
 
