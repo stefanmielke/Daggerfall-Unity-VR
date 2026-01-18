@@ -970,32 +970,32 @@ namespace DFUVR
         [HarmonyPrefix]
         internal static void Prefix(WeaponManager __instance)
         {
+            if (Var.weaponObject != null)
+                Destroy(Var.weaponObject);
+
+            if (__instance.ScreenWeapon == null)
+            {
+                Var.currentWeaponName = null;
+                return;
+            }
+
+            Var.currentWeaponName = __instance.ScreenWeapon.SpecificWeapon?.LongName ?? "";
+
+            HandObject currentHandObject = null;
+            if (Var.handObjectsByName.ContainsKey(Var.currentWeaponName))
+                currentHandObject = Var.handObjectsByName[Var.currentWeaponName];
+            else
+                currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
+
+            GameObject tempObject = currentHandObject.gameObject;
+
+            Var.weaponObject = Instantiate(tempObject);
+            Var.weaponObject.GetComponent<Collider>().enabled = true;
+
             // if it is unsheathing
             if (__instance.Sheathed)
             {
                 Var.sheathObject.GetComponent<MeshRenderer>().enabled = true;
-                Destroy(Var.weaponObject);
-                Hands.rHand.SetActive(false);
-                Hands.lHand.SetActive(false);
-
-                if (__instance.ScreenWeapon == null)
-                {
-                    Var.currentWeaponName = null;
-                    return;
-                }
-
-                Var.currentWeaponName = __instance.ScreenWeapon.SpecificWeapon?.LongName ?? "";
-
-                HandObject currentHandObject = null;
-                if (Var.handObjectsByName.ContainsKey(Var.currentWeaponName))
-                    currentHandObject = Var.handObjectsByName[Var.currentWeaponName];
-                else
-                    currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
-
-                GameObject tempObject = currentHandObject.gameObject;
-
-                Var.weaponObject = Instantiate(tempObject);
-                Var.weaponObject.GetComponent<Collider>().enabled = true;
 
                 if (Var.leftHanded)
                     Var.weaponObject.transform.SetParent(Var.leftHand.transform);
@@ -1005,33 +1005,18 @@ namespace DFUVR
                 Var.weaponObject.transform.localPosition = currentHandObject.unsheatedPositionOffset;
                 Var.weaponObject.transform.localRotation = currentHandObject.unsheatedRotationOffset;
                 Var.weaponObject.SetActive(true);
+
+                Hands.rHand.SetActive(false);
+                Hands.lHand.SetActive(false);
             }
             else
             {
-                if (Var.weaponObject != null)
-                {
-                    HandObject currentHandObject = null;
-                    if (__instance.ScreenWeapon == null)
-                    {
-                        Var.currentWeaponName = null;
-                    }
-                    else
-                    {
-                        Var.currentWeaponName = __instance.ScreenWeapon.SpecificWeapon?.LongName ?? "";
+                Var.weaponObject.GetComponent<Collider>().enabled = false;
+                Var.weaponObject.transform.SetParent(Var.sheathObject.transform);
 
-                        if (Var.handObjectsByName.ContainsKey(Var.currentWeaponName))
-                            currentHandObject = Var.handObjectsByName[Var.currentWeaponName];
-                        else
-                            currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
-
-                        Var.weaponObject.GetComponent<Collider>().enabled = false;
-                        Var.weaponObject.transform.SetParent(Var.sheathObject.transform);
-
-                        Var.weaponObject.transform.localPosition = currentHandObject.sheatedPositionOffset;
-                        Var.weaponObject.transform.localRotation = currentHandObject.sheatedRotationOffset;
-                        Var.sheathObject.GetComponent<MeshRenderer>().enabled = currentHandObject.renderSheated;
-                    }
-                }
+                Var.weaponObject.transform.localPosition = currentHandObject.sheatedPositionOffset;
+                Var.weaponObject.transform.localRotation = currentHandObject.sheatedRotationOffset;
+                Var.sheathObject.GetComponent<MeshRenderer>().enabled = currentHandObject.renderSheated;
 
                 Hands.rHand.SetActive(true);
                 Hands.lHand.SetActive(true);
