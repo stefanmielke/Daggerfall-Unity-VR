@@ -577,7 +577,7 @@ namespace DFUVR
                     Plugin.LoggerInstance.LogInfo($"{component.GetType().Name}");
             }
 
-            handObjectDictionary[WeaponTypes.LongBlade].gameObject.AddComponent<DebugColliders>();
+            //handObjectDictionary[WeaponTypes.LongBlade].gameObject.AddComponent<DebugColliders>();
 
             currentBundle?.Unload(false);
         }
