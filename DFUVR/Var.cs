@@ -57,7 +57,6 @@ namespace DFUVR
         public static string placeholder = null;
         public static bool fStartMenu = false;
 
-        public static Camera mainCamera;
         public static Camera uiCamera;
         public static GameObject rightHand;
         public static GameObject leftHand;
