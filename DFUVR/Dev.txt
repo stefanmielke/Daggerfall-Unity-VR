@@ -8,9 +8,12 @@ NotificationCamera: Position:(0,1.294,1.556), rotation: (0,0,0), FOV:27.8, Disab
 
 TODO list:
 
-collision with some weapons from WISA not working
+test new weapon timing to repeat attack
 
 interaction is broken
+Plugin.cs:1609
+
+collision with some weapons from WISA not working
 
 able to use 2 weapons when one on each hand
 - when off hand free, show a hand to swap
@@ -25,7 +28,6 @@ wearable lanterns and torches
 https://www.nexusmods.com/daggerfallunity/mods/391
 
 spell selection menu
-
 or quick menu with hand, like quick slots or like Skyrim/alyx
 
 fix skybox
@@ -82,9 +84,7 @@ fix loading screen being right next to your face
 
 move scroll bar with sticks
 
-GitHub action to build
-
-improve speed of the sheath model
+improve turning speed of the sheath
 
 improve joystick handling on the code
 
