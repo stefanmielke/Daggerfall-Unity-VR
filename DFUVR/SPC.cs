@@ -34,7 +34,6 @@ namespace DFUVR
 
         void Start()
         {
-
         }
         public void Initialize(LineRenderer line, GraphicRaycaster graphicRaycaster, TrackedPoseDriver tracked)
         {
@@ -108,12 +107,8 @@ namespace DFUVR
                             //windowCoord = result.windowCoord;
                             Vector2 desktopCoord = result.desktopCoord;
 
-                            if (Input.GetKeyDown(Var.acceptButton) || Var.rTriggerDone || Var.lTriggerDone)
-                            {
+                            if (MouseClick((uint)desktopCoord.x, (uint)desktopCoord.y))
                                 SetCursorPos((int)desktopCoord.x, (int)desktopCoord.y);
-                                mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
-                                mouse_event(MOUSEEVENTF_LEFTUP, (uint)desktopCoord.x, (uint)desktopCoord.y, 0, 0);
-                            }
                         }
                     }
                     else
@@ -133,7 +128,7 @@ namespace DFUVR
                         }
                     }
                 }
-                else if (Input.GetKeyDown(Var.acceptButton) || Var.rTriggerDone || Var.lTriggerDone)
+                else if (Input.GetKeyDown(Var.acceptButton) || TriggerProvider.pressedDone)
                 {
                     RaycastHit[] hits = Physics.RaycastAll(lineStart, trackedPoseDriver.transform.forward, raycastDistance);
 
@@ -153,6 +148,12 @@ namespace DFUVR
                     }
                 }
             }
+
+            if (isClicking && (!Input.GetKeyDown(Var.acceptButton) && !TriggerProvider.pressedDone))
+            {
+                isClicking = false;
+                mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+            }
         }
 
         private void SimulateMouseClick(Vector3 hitPoint)
@@ -170,35 +171,24 @@ namespace DFUVR
             int screenX = (int)(normalizedX * Screen.width); //+ windowPosX;
             int screenY = (int)((1 - normalizedY) * Screen.height);// + windowPosY; 
 
+            MouseClick((uint)screenX, (uint)screenY);
+            SetCursorPos((int)screenX, (int)screenY);
+            //Plugin.LoggerInstance.LogInfo($"Simulated mouse click at ({screenX}, {screenY})");
+        }
+
+        private bool MouseClick(uint x, uint y)
+        {
             if (!isClicking && (Input.GetKeyDown(Var.acceptButton) || TriggerProvider.pressedDone))
             {
-                Plugin.LoggerInstance.LogInfo("Clicked");
-                Plugin.LoggerInstance.LogInfo($"Local Hit Point: {localHitPoint}");
-                Plugin.LoggerInstance.LogInfo("Width: " + Screen.width);
-                Plugin.LoggerInstance.LogInfo("Height: " + Screen.height);
-                Plugin.LoggerInstance.LogInfo("Aspect ratio: " + asp);
-                Plugin.LoggerInstance.LogInfo($"Normalized Hit Point: ({normalizedX}, {normalizedY})");
-                Plugin.LoggerInstance.LogInfo($"Screen Coordinates: ({screenX}, {screenY})");
-
-                mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)screenX, (uint)screenY, 0, 0);
+                mouse_event(MOUSEEVENTF_LEFTDOWN, x, y, 0, 0);
                 isClicking = true;
             }
             else if (isClicking && (!Input.GetKeyDown(Var.acceptButton) && !TriggerProvider.pressedDone))
             {
-                Plugin.LoggerInstance.LogInfo("Unclicked");
-                Plugin.LoggerInstance.LogInfo($"Local Hit Point: {localHitPoint}");
-                Plugin.LoggerInstance.LogInfo("Width: " + Screen.width);
-                Plugin.LoggerInstance.LogInfo("Height: " + Screen.height);
-                Plugin.LoggerInstance.LogInfo("Aspect ratio: " + asp);
-                Plugin.LoggerInstance.LogInfo($"Normalized Hit Point: ({normalizedX}, {normalizedY})");
-                Plugin.LoggerInstance.LogInfo($"Screen Coordinates: ({screenX}, {screenY})");
-
                 isClicking = false;
-                mouse_event(MOUSEEVENTF_LEFTUP, (uint)screenX, (uint)screenY, 0, 0);
+                mouse_event(MOUSEEVENTF_LEFTUP, x, y, 0, 0);
             }
-
-            SetCursorPos((int)screenX, (int)screenY);
-            //Plugin.LoggerInstance.LogInfo($"Simulated mouse click at ({screenX}, {screenY})");
+            return isClicking;
         }
     }
 }
