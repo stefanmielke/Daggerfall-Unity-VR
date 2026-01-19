@@ -40,9 +40,9 @@ namespace DFUVR
             if (timeToNextDamage > Time.time)
                 return;
 
-            timeToNextDamage = Time.time + Var.weaponManager.ScreenWeapon.GetAnimTime();
-
             //Plugin.LoggerInstance.LogInfo("Hit something");
+
+            bool hitSomething = false;
 
             if (other.GetComponent<DaggerfallEntityBehaviour>())
             {
@@ -67,7 +67,7 @@ namespace DFUVR
                 if (player.gameObject.GetInstanceID() != other.gameObject.GetInstanceID())
                 {
                     Var.weaponManager.WeaponDamage(currentRightHandWeapon, false, false, hitTransform, hitTransform.localPosition, hitDirection);
-                    Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.RightHand, 0.6f);
+                    hitSomething = true;
                 }
             }
             else if (other.GetComponent<DaggerfallAction>())
@@ -76,8 +76,7 @@ namespace DFUVR
                 DaggerfallAction action = other.GetComponent<DaggerfallAction>();
                 GameObject player = (GameObject)AccessTools.Field(typeof(WeaponManager), "player").GetValue(Var.weaponManager);
                 action.Receive(player, DaggerfallAction.TriggerTypes.Attack);
-
-                Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.RightHand, 0.6f);
+                hitSomething = true;
             }
             else if (other.GetComponent<DaggerfallActionDoor>())
             {
@@ -86,11 +85,15 @@ namespace DFUVR
                 if (actionDoor)
                 {
                     actionDoor.AttemptBash(true);
-
-                    Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.RightHand, 0.6f);
+                    hitSomething = true;
                 }
             }
-            //else if()
+
+            if (hitSomething)
+            {
+                Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.RightHand, 0.6f);
+                timeToNextDamage = Time.time + minTimeToDamageAgain;
+            }
         }
     }
 }
