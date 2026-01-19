@@ -93,14 +93,13 @@ namespace DFUVR
             Var.fStartMenu = false;
             turnStyle = Var.turnOptionsText.text;
             dominantHand = Var.handOptionsText.text;
-            string filePath = Path.Combine(Paths.PluginPath, "Settings.txt");
-            string[] lines = File.ReadAllLines(filePath);
-            lines[5] = "false";
-            Plugin.LoggerInstance.LogInfo("Reached saving part");
-            lines[6] = string.Format(CultureInfo.InvariantCulture, dominantHand);
-            lines[7] = string.Format(CultureInfo.InvariantCulture, turnStyle);
-            Plugin.LoggerInstance.LogInfo($"Saving part ended with {dominantHand} and {turnStyle}");
-            File.WriteAllLines(filePath, lines);
+
+            var settings = Settings.LoadFromFile();
+            settings.showStartMenu = false;
+            settings.dominantHand = string.Format(CultureInfo.InvariantCulture, dominantHand);
+            settings.turnStyle = string.Format(CultureInfo.InvariantCulture, turnStyle);
+            settings.SaveToFile();
+
             Application.Quit();
         }
         public static void SaveButtonClick(GameObject currentMenu, GameObject nextMenu, bool mainMenuC, bool mainMenuM)
@@ -109,11 +108,12 @@ namespace DFUVR
             {
                 cType = GameObject.Find("CLabel").GetComponent<Text>().text;
                 refresh_rate = GameObject.Find("HzLabel").GetComponent<Text>().text;
-                string filePath = Path.Combine(Paths.PluginPath, "Settings.txt");
-                string[] lines = File.ReadAllLines(filePath);
-                lines[2] = string.Format(CultureInfo.InvariantCulture, cType);
-                lines[1] = string.Format(CultureInfo.InvariantCulture, refresh_rate);
-                File.WriteAllLines(filePath, lines);
+
+                var settings = Settings.LoadFromFile();
+                settings.headsetType = string.Format(CultureInfo.InvariantCulture, cType);
+                settings.headsetFps = int.Parse(refresh_rate, CultureInfo.InvariantCulture);
+                settings.SaveToFile();
+
                 MenuTransition(currentMenu, nextMenu, mainMenuC, mainMenuM);
             }
             catch(Exception e) { Plugin.LoggerInstance.LogError(e); }

@@ -205,21 +205,19 @@ namespace DFUVR
         {
             started = false;
             Debug.Log("Reading Controller Settings");
-            string filePath = Path.Combine(Paths.PluginPath, "Settings.txt");
 
-            try //to read the Settings.txt file
+            try //to read the Settings file
             {
-                string fileContent = FileReader.ReadFromFile(filePath);
-                string[] lines = fileContent.Split('\n');
-                Debug.Log(lines[2].Trim());
+                var settings = Settings.LoadFromFile();
+                Debug.Log(settings.headsetType);
                 //using only a bool makes the settings file too hard to understand for most people
                 //bool.TryParse(lines[6], out leftHanded);
-                if (lines[6].Trim() == "left") { leftHanded = true; }
+                if (settings.dominantHand == "left") { leftHanded = true; }
 
                 //Set the bindings to the default Oculus Touch bindings
                 //This is not necessary. The default values are already set up for the Touch Controllers
                 //only if the player ist left handed, change the grip buttons
-                string headset = lines[2].Trim();
+                string headset = settings.headsetType;
                 if (headset == "Oculus/Meta")
                 {
                     if (leftHanded)
@@ -274,42 +272,40 @@ namespace DFUVR
                 float targetTimeStep;
                 try
                 {
-                    fileContent = FileReader.ReadFromFile(filePath);
                     //lines = fileContent.Split('\n');
-                    Debug.Log("Line1:" + lines[0].Trim());
-                    Debug.Log("Line2:" + lines[1].Trim());
-                    heightOffset = float.Parse(lines[0].Trim(), CultureInfo.InvariantCulture);
+                    Debug.Log("Line1:" + settings.heightOffset.ToString(CultureInfo.InvariantCulture));
+                    Debug.Log("Line2:" + settings.headsetFps);
+                    heightOffset = settings.heightOffset;
                     Plugin.LoggerInstance.LogInfo(heightOffset);
-                    targetTimeStep = 1f / float.Parse(lines[1].Trim());
+                    targetTimeStep = 1f / settings.headsetFps;
                     Plugin.LoggerInstance.LogInfo(targetTimeStep);
 
                 }
                 catch (Exception e)//if it doesn't work, set it to an emergency default value
                 {
-                    Plugin.LoggerInstance.LogError("Made a fucky wucky while reading the file, oopsie! Error: " + e);
+                    Plugin.LoggerInstance.LogError("Made a fucky wucky while reading the file, oopsie! Error: " + e.Message);
                     targetTimeStep = 1f / 90f;
                 }
 
                 Time.fixedDeltaTime = targetTimeStep;
                 Plugin.LoggerInstance.LogInfo(Time.fixedDeltaTime);
 
-                string rawLine3 = lines[3].Trim();
-                Plugin.LoggerInstance.LogInfo(rawLine3);
-                string[] sheathVector = rawLine3.Split(',');
+                Plugin.LoggerInstance.LogInfo(settings.sheathOffset);
+                string[] sheathVector = settings.sheathOffset.Split(',');
                 float x = float.Parse(sheathVector[0], CultureInfo.InvariantCulture);
                 float y = float.Parse(sheathVector[1], CultureInfo.InvariantCulture);
                 float z = float.Parse(sheathVector[2], CultureInfo.InvariantCulture);
                 Plugin.LoggerInstance.LogInfo(x);
                 sheathOffset = new Vector3(x, y, z);
-                bool.TryParse(lines[5], out fStartMenu);
+                fStartMenu = settings.showStartMenu;
                 //bool.TryParse(lines[6],out leftHanded);
                 Plugin.LoggerInstance.LogInfo("Offsett: " + sheathOffset.ToString());
 
-                if (lines[7].Trim() == "smooth")
+                if (settings.turnStyle == "smooth")
                     smoothTurn = true;
                 Plugin.LoggerInstance.LogInfo("Smooth turn: " + smoothTurn);
 
-                if (lines[7].Trim() == "none")
+                if (settings.turnStyle == "none")
                     noTurn = true;
             }
             catch (Exception e)
@@ -322,14 +318,12 @@ namespace DFUVR
         //This saves the players height in Settings.txt. Gets called after exiting calibration mode
         public static void SaveHeight()
         {
-            string filePath = Path.Combine(Paths.PluginPath, "Settings.txt");
-            string[] lines = File.ReadAllLines(filePath);
+            Settings settings = Settings.LoadFromFile();
+            settings.heightOffset = heightOffset;//Var.heightOffset.ToString();
+            settings.sheathOffset = string.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", sphereObject.transform.localPosition.x, sphereObject.transform.localPosition.y, sphereObject.transform.localPosition.z);//Var.sphereObject.transform.localPosition.ToString();//Var.sheathOffset.ToString();
+            settings.connectedJoysticks = connectedJoysticks;
 
-            lines[0] = string.Format(CultureInfo.InvariantCulture, "{0}", heightOffset);//Var.heightOffset.ToString();
-            lines[3] = string.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", sphereObject.transform.localPosition.x, sphereObject.transform.localPosition.y, sphereObject.transform.localPosition.z);//Var.sphereObject.transform.localPosition.ToString();//Var.sheathOffset.ToString();
-            lines[4] = connectedJoysticks.ToString();
-
-            File.WriteAllLines(filePath, lines);
+            settings.SaveToFile();
         }
     }
 }
