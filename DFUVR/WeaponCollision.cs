@@ -4,6 +4,7 @@ using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
 using HarmonyLib;
 using DaggerfallWorkshop.Game.Items;
+using DaggerfallWorkshop.Game.Formulas;
 namespace DFUVR
 {
     public class WeaponCollision : MonoBehaviour
@@ -31,10 +32,16 @@ namespace DFUVR
 
         private void OnTriggerEnter(Collider other)
         {
+            if (Var.weaponManager == null)
+            {
+                Plugin.LoggerInstance.LogError("WeaponManager is null");
+                return;
+            }
+
             if (timeToNextDamage > Time.time)
                 return;
 
-            timeToNextDamage = Time.time + minTimeToDamageAgain;
+            timeToNextDamage = Time.time + Var.weaponManager.ScreenWeapon.GetAnimTime();
 
             //Plugin.LoggerInstance.LogInfo("Hit something");
 
@@ -53,30 +60,20 @@ namespace DFUVR
                 //}
                 Vector3 hitDirection = other.transform.position - transform.position;
                 Transform hitTransform = other.transform;
-                WeaponManager weaponManager = GameObject.Find("PlayerAdvanced").GetComponent<WeaponManager>();
-                DaggerfallUnityItem currentRightHandWeapon = (DaggerfallUnityItem)AccessTools.Field(typeof(WeaponManager), "currentRightHandWeapon").GetValue(weaponManager);
+                DaggerfallUnityItem currentRightHandWeapon = (DaggerfallUnityItem)AccessTools.Field(typeof(WeaponManager), "currentRightHandWeapon").GetValue(Var.weaponManager);
                 hitDirection = hitDirection.normalized;
                 //Debug.Log("Hit Direction: " + hitDirection);
 
-                weaponManager.WeaponDamage(currentRightHandWeapon, false, false, hitTransform, hitTransform.localPosition, hitDirection);
-
+                Var.weaponManager.WeaponDamage(currentRightHandWeapon, false, false, hitTransform, hitTransform.localPosition, hitDirection);
             }
             else if (other.GetComponent<DaggerfallAction>())
             {
                 Plugin.LoggerInstance.LogInfo("Hit action");
-                DaggerfallAction action= other.GetComponent<DaggerfallAction>();
-                if (Var.weaponManager != null)
-                {
-                    GameObject player = (GameObject)AccessTools.Field(typeof(WeaponManager), "player").GetValue(Var.weaponManager);
-                    action.Receive(player, DaggerfallAction.TriggerTypes.Attack);
-                }
-                else
-                {
-                    Plugin.LoggerInstance.LogError("null");
-                }
-
+                DaggerfallAction action = other.GetComponent<DaggerfallAction>();
+                GameObject player = (GameObject)AccessTools.Field(typeof(WeaponManager), "player").GetValue(Var.weaponManager);
+                action.Receive(player, DaggerfallAction.TriggerTypes.Attack);
             }
-            else if (other.GetComponent<DaggerfallActionDoor>()) 
+            else if (other.GetComponent<DaggerfallActionDoor>())
             {
                 //Plugin.LoggerInstance.LogInfo("Hit door");
                 DaggerfallActionDoor actionDoor = other.GetComponent<DaggerfallActionDoor>();
@@ -84,15 +81,10 @@ namespace DFUVR
                 {
                     actionDoor.AttemptBash(true);
                 }
-
-
             }
 
             Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.RightHand, 0.6f);
             //else if()
-
         }
-
-
     }
 }
