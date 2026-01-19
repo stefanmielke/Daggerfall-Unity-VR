@@ -4,7 +4,6 @@ using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
 using HarmonyLib;
 using DaggerfallWorkshop.Game.Items;
-using DaggerfallWorkshop.Game.Formulas;
 namespace DFUVR
 {
     public class WeaponCollision : MonoBehaviour
@@ -64,7 +63,12 @@ namespace DFUVR
                 hitDirection = hitDirection.normalized;
                 //Debug.Log("Hit Direction: " + hitDirection);
 
-                Var.weaponManager.WeaponDamage(currentRightHandWeapon, false, false, hitTransform, hitTransform.localPosition, hitDirection);
+                GameObject player = (GameObject)AccessTools.Field(typeof(WeaponManager), "player").GetValue(Var.weaponManager);
+                if (player.gameObject.GetInstanceID() != other.gameObject.GetInstanceID())
+                {
+                    Var.weaponManager.WeaponDamage(currentRightHandWeapon, false, false, hitTransform, hitTransform.localPosition, hitDirection);
+                    Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.RightHand, 0.6f);
+                }
             }
             else if (other.GetComponent<DaggerfallAction>())
             {
@@ -72,6 +76,8 @@ namespace DFUVR
                 DaggerfallAction action = other.GetComponent<DaggerfallAction>();
                 GameObject player = (GameObject)AccessTools.Field(typeof(WeaponManager), "player").GetValue(Var.weaponManager);
                 action.Receive(player, DaggerfallAction.TriggerTypes.Attack);
+
+                Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.RightHand, 0.6f);
             }
             else if (other.GetComponent<DaggerfallActionDoor>())
             {
@@ -80,10 +86,10 @@ namespace DFUVR
                 if (actionDoor)
                 {
                     actionDoor.AttemptBash(true);
+
+                    Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.RightHand, 0.6f);
                 }
             }
-
-            Haptics.TriggerHapticFeedback(UnityEngine.XR.XRNode.RightHand, 0.6f);
             //else if()
         }
     }
