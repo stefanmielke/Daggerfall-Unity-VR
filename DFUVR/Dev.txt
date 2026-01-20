@@ -8,10 +8,7 @@ NotificationCamera: Position:(0,1.294,1.556), rotation: (0,0,0), FOV:27.8, Disab
 
 TODO list:
 
-test new weapon timing to repeat attack
-
-interaction is broken
-Plugin.cs:1609
+use weapon timing to repeat attack
 
 collision with some weapons from WISA not working
 
