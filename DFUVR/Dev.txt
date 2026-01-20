@@ -10,8 +10,6 @@ TODO list:
 
 use weapon timing to repeat attack
 
-collision with some weapons from WISA not working
-
 able to use 2 weapons when one on each hand
 - when off hand free, show a hand to swap
 - when off hand occupied, show the other weapon
@@ -45,6 +43,7 @@ removing the fake blocks with actual hud
 proper VR hands
 still show hand when not holding weapon
 
+[in progress by LokiusV]
 menu interactions by grabbing things on the body
 - book to check quests
 - map for map
