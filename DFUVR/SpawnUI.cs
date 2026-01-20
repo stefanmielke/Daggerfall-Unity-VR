@@ -111,7 +111,7 @@ namespace DFUVR
                     vrparent.transform.localPosition = new Vector3(0, (float)Var.heightOffset, 0);
 
                     vrui.transform.parent = vrparent.transform;
-                    vrui.transform.localScale = new Vector3(Screen.width / 1000f, Screen.height / 1000f, 1);
+                    vrui.transform.localScale = new Vector3(Var.screenWidth / 1000f, Var.screenHeight / 1000f, 1);
 
                     Hands.Spawn();
 

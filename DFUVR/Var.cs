@@ -25,6 +25,8 @@ namespace DFUVR
         public static int debugInt2 = 0;
         public static bool isFirst = true;
         public static Camera VRCamera;
+        public static int screenWidth = 1920;
+        public static int screenHeight = 1080;
         public static bool charControllerCalibrated = false;
         public static bool isCalibrated = false;
         public static bool uiActive = true;

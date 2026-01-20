@@ -160,7 +160,7 @@ namespace DFUVR
         {
             GameObject vrui = GameObject.Find("VRUI");
             Vector3 localHitPoint = vrui.transform.InverseTransformPoint(hitPoint);
-            double asp = (double)Screen.width / Screen.height;
+            double asp = (double)Var.screenWidth / Var.screenHeight;
 
             double normalizedX = (localHitPoint.x * asp + (vrui.transform.localScale.x * 0.5f)) / vrui.transform.localScale.x;//(1.77f)
             double normalizedY = (localHitPoint.y + (vrui.transform.localScale.y * 0.5f)) / vrui.transform.localScale.y;
@@ -168,8 +168,8 @@ namespace DFUVR
             //double normalizedY = (localHitPoint.y *0.9f + (vrui.transform.localScale.y * 0.5f)) / vrui.transform.localScale.y;
 
 
-            int screenX = (int)(normalizedX * Screen.width); //+ windowPosX;
-            int screenY = (int)((1 - normalizedY) * Screen.height);// + windowPosY; 
+            int screenX = (int)(normalizedX * Var.screenWidth); //+ windowPosX;
+            int screenY = (int)((1 - normalizedY) * Var.screenHeight);// + windowPosY; 
 
             MouseClick((uint)screenX, (uint)screenY);
             SetCursorPos((int)screenX, (int)screenY);
