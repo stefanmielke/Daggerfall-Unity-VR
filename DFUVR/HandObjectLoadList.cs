@@ -520,8 +520,17 @@ namespace DFUVR
                             }
                             else
                             {
-                                newCollider.convex = true;
-                                newCollider.sharedMesh = meshFilter.sharedMesh;
+                                if (!meshFilter.sharedMesh.isReadable)
+                                {
+                                    Plugin.LoggerInstance.LogWarning($"Mesh for '{handObjectLoad.assetName}' is not readable, collision may not work properly. Not adding to the list.");
+                                    Destroy(gameObject);
+                                    continue;
+                                }
+                                else
+                                {
+                                    newCollider.convex = true;
+                                    newCollider.sharedMesh = meshFilter.sharedMesh;
+                                }
                             }
 
                             collider = newCollider;
@@ -572,9 +581,7 @@ namespace DFUVR
 
                 handObjectLoad.postAction?.Invoke(gameObject);
 
-                Plugin.LoggerInstance.LogInfo($"Components of ${handObjectLoad.assetName}:");
-                foreach (var component in gameObject.GetComponentsInChildren<Component>())
-                    Plugin.LoggerInstance.LogInfo($"{component.GetType().Name}");
+                Plugin.LoggerInstance.LogInfo($"Loaded ${handObjectLoad.assetName}.");
             }
 
             //handObjectDictionary[WeaponTypes.LongBlade].gameObject.AddComponent<DebugColliders>();
