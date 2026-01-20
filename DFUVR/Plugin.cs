@@ -982,7 +982,7 @@ namespace DFUVR
             Var.currentWeaponName = __instance.ScreenWeapon.SpecificWeapon?.LongName ?? "";
 
             HandObject currentHandObject = null;
-            if (Var.handObjectsByName.ContainsKey(Var.currentWeaponName))
+            if (__instance.ScreenWeapon.WeaponType != WeaponTypes.Bow && Var.handObjectsByName.ContainsKey(Var.currentWeaponName))
                 currentHandObject = Var.handObjectsByName[Var.currentWeaponName];
             else
                 currentHandObject = Var.handObjects[__instance.ScreenWeapon.WeaponType];
