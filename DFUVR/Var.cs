@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.XR;
 
 namespace DFUVR
 {
@@ -79,6 +80,7 @@ namespace DFUVR
         public static int connectedJoysticks;
 
         public static GameObject keyboard;
+        public static float scrollSpeed = 2;
 
         public static float active;
 
@@ -111,6 +113,15 @@ namespace DFUVR
         public static CharacterController characterController = null;
 
         public static volatile bool skyboxToggle = true;
+
+        // TODO: set this when the game loads
+        public static InputDevice mainHand
+        {
+            get
+            {
+                return leftHanded ? InputDevices.GetDeviceAtXRNode(XRNode.LeftHand) : InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+            }
+        }
 
         //Load weapon and other models from the Asset bundles
         public static void InitModels()
