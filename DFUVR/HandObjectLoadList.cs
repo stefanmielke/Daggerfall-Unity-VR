@@ -509,8 +509,6 @@ namespace DFUVR
                     {
                         if (handObjectLoad.colliderType == typeof(MeshCollider))
                         {
-                            var newCollider = gameObject.AddComponent(handObjectLoad.colliderType) as MeshCollider;
-
                             var meshFilter = gameObject.GetComponentInChildren<MeshFilter>();
                             if (meshFilter == null)
                             {
@@ -522,18 +520,21 @@ namespace DFUVR
                             {
                                 if (!meshFilter.sharedMesh.isReadable)
                                 {
-                                    Plugin.LoggerInstance.LogWarning($"Mesh for '{handObjectLoad.assetName}' is not readable, collision may not work properly. Not adding to the list.");
-                                    Destroy(gameObject);
-                                    continue;
+                                    Plugin.LoggerInstance.LogWarning($"Mesh for '{handObjectLoad.assetName}' is not readable, collision may not work properly. Adding BoxCollider as replacement.");
+
+                                    BoxCollider boxCollider = gameObject.AddComponent<BoxCollider>();
+                                    boxCollider.size = meshFilter.mesh.bounds.size;
+                                    boxCollider.center = meshFilter.mesh.bounds.center;
+                                    collider = boxCollider;
                                 }
                                 else
                                 {
+                                    var newCollider = gameObject.AddComponent(handObjectLoad.colliderType) as MeshCollider;
                                     newCollider.convex = true;
                                     newCollider.sharedMesh = meshFilter.sharedMesh;
+                                    collider = newCollider;
                                 }
                             }
-
-                            collider = newCollider;
                         }
                         else
                             collider = gameObject.AddComponent(handObjectLoad.colliderType) as Collider;
